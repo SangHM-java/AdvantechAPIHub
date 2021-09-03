@@ -1,15 +1,7 @@
-<!-- <ul *ngIf="users">
-  <li *ngFor="let user of users['data']">
-    <img [src]="user.avatar">
-    <p>{{ user.first_name }} {{ user.last_name }}</p>
-  </li>
-</ul> -->
+
 
 <form [formGroup]="messageForm" (ngSubmit)="onSubmit()">
-  <!-- <h5 *ngIf="success">Your form is valid!</h5> -->
 
-
-  {{ model | json }}
   <div class="row">
     <div class="col-md-4">
       <h1>DataHub Edge SDK</h1>
@@ -35,8 +27,6 @@
         <input type="text" class="form-control" >
       </div>
 
-      <!-- <input type="submit" value="Send message" class="cta" /> -->
-      <!-- <button style="margin: 10px;background-color: lightgrey" mat-raised-button >Send Data</button> -->
     </div>
 
     <div class="col-md-5">
@@ -67,125 +57,7 @@
         <button class="col-md-5" style="margin: 10px;background-color: lightgrey" mat-raised-button disabled>Update
           device status </button>
       </div>
-      <!-- <section>
-        <div class="example-label">Basic</div>
-        <div class="row">
-          <button mat-button>Basic</button>
-          <button mat-button color="primary">Primary</button>
-          <button mat-button color="accent">Accent</button>
-          <button mat-button color="warn">Warn</button>
-          <button mat-button disabled>Disabled</button>
-          <a mat-button href="https://www.google.com/" target="_blank">Link</a>
-        </div>
-      </section> -->
-      <!-- <mat-divider></mat-divider>
-      <section>
-        <div class="example-label">Raised</div>
-       
-      </section>
-      <mat-divider></mat-divider> -->
-      <!-- <section>
-        <div class="example-label">Stroked</div>
-        <div class="row">
-          <button mat-stroked-button>Basic</button>
-          <button mat-stroked-button color="primary">Primary</button>
-          <button mat-stroked-button color="accent">Accent</button>
-          <button mat-stroked-button color="warn">Warn</button>
-          <button mat-stroked-button disabled>Disabled</button>
-          <a mat-stroked-button href="https://www.google.com/" target="_blank">Link</a>
-        </div>
-      </section>
-      <mat-divider></mat-divider>
-      <section>
-        <div class="example-label">Flat</div>
-        <div class="row">
-          <button mat-flat-button>Basic</button>
-          <button mat-flat-button color="primary">Primary</button>
-          <button mat-flat-button color="accent">Accent</button>
-          <button mat-flat-button color="warn">Warn</button>
-          <button mat-flat-button disabled>Disabled</button>
-          <a mat-flat-button href="https://www.google.com/" target="_blank">Link</a>
-        </div>
-      </section>
-      <mat-divider></mat-divider>
-      <section>
-        <div class="example-label">Icon</div>
-        <div class="row">
-          <div class="example-flex-container">
-            <button mat-icon-button aria-label="Example icon button with a vertical three dot icon">
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <button mat-icon-button color="primary" aria-label="Example icon button with a home icon">
-              <mat-icon>home</mat-icon>
-            </button>
-            <button mat-icon-button color="accent" aria-label="Example icon button with a menu icon">
-              <mat-icon>menu</mat-icon>
-            </button>
-            <button mat-icon-button color="warn" aria-label="Example icon button with a heart icon">
-              <mat-icon>favorite</mat-icon>
-            </button>
-            <button mat-icon-button disabled aria-label="Example icon button with a open in new tab icon">
-              <mat-icon>open_in_new</mat-icon>
-            </button>
-          </div>
-        </div>
-      </section>
-      <mat-divider></mat-divider>
-      <section>
-        <div class="example-label">FAB</div>
-        <div class="row">
-          <div class="example-flex-container">
-            <div class="example-button-container">
-              <button mat-fab color="primary" aria-label="Example icon button with a delete icon">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-            <div class="example-button-container">
-              <button mat-fab color="accent" aria-label="Example icon button with a bookmark icon">
-                <mat-icon>bookmark</mat-icon>
-              </button>
-            </div>
-            <div class="example-button-container">
-              <button mat-fab color="warn" aria-label="Example icon button with a home icon">
-                <mat-icon>home</mat-icon>
-              </button>
-            </div>
-            <div class="example-button-container">
-              <button mat-fab disabled aria-label="Example icon button with a heart icon">
-                <mat-icon>favorite</mat-icon>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-      <mat-divider></mat-divider>
-      <section>
-        <div class="example-label">Mini FAB</div>
-        <div class="row">
-          <div class="example-flex-container">
-            <div class="example-button-container">
-              <button mat-mini-fab color="primary" aria-label="Example icon button with a menu icon">
-                <mat-icon>menu</mat-icon>
-              </button>
-            </div>
-            <div class="example-button-container">
-              <button mat-mini-fab color="accent" aria-label="Example icon button with a plus one icon">
-                <mat-icon>plus_one</mat-icon>
-              </button>
-            </div>
-            <div class="example-button-container">
-              <button mat-mini-fab color="warn" aria-label="Example icon button with a filter list icon">
-                <mat-icon>filter_list</mat-icon>
-              </button>
-            </div>
-            <div class="example-button-container">
-              <button mat-mini-fab disabled aria-label="Example icon button with a home icon">
-                <mat-icon>home</mat-icon>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section> -->
+      
 
     </div>
 
@@ -231,11 +103,9 @@
 
 </form>
 
-<form [formGroup]="messageForm" (ngSubmit)="onSubmit()">
+<form >
   <!-- <h5 *ngIf="success">Your form is valid!</h5> -->
 
-
-  
   <div class="row" style="padding-top:50px">
     <div class="col-md-12">
       <h1>API Get Data</h1>
@@ -243,8 +113,8 @@
     </div>
 
     <div class="col-md-12">
-     <span> <strong>Url: </strong>https://reqres.in/api/users</span>
-     <br>
+     <span> <strong>Url: </strong>http://smart.cpc.vn/etl/api/getInfoMeter</span>
+     <button (click)="getDataFromAPI()" style="margin: 10px;" color="primary" mat-raised-button>Get Data From API</button>     <br>
      <br>
      {{users | json}}
      <!-- <mat-card>{{users | json}}</mat-card>

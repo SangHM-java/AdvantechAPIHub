@@ -27,6 +27,11 @@ exports.routesConfig = function (app) {
     // ValidationMiddleware.validJWTNeeded,
     CategoryController.list
   ]);
+  //datahub apis
+  app.get('/getData', [
+    // ValidationMiddleware.validJWTNeeded,
+    CategoryController.getData
+  ]);
   app.post('/datahub', [
     // ValidationMiddleware.validJWTNeeded,
     // PermissionMiddleware.minimumPermissionLevelRequired,

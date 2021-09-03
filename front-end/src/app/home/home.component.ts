@@ -42,4 +42,10 @@ export class HomeComponent implements OnInit {
     }
     this.success = true;
   }
+
+  getDataFromAPI(){
+    this.data.getDataFromAPI().subscribe(data => {
+      console.log(data);
+    });
+  }
 }

@@ -6,7 +6,29 @@
 // const { v4: uuidv4 } = require('uuid');
 // const fs = require('fs');
 // const uploadPath = require('../../common/config/env.config.js').upload_path;
+const config = require('../../common/config/env.config');
+const http = require('http');
+const querystring = require('querystring');
 const edgeSDK = require('wisepaas-datahub-edge-nodejs-sdk');
+
+// GET parameters
+const parameters = {
+    MA_DIEMDO: "S1.01_AN",
+    TU_NGAY: "8/22/2021 6:41:12",
+    DEN_NGAY: "8/24/2021 6:41:12",
+    TOKEN: config.token
+}
+
+// const get_request_args = querystring.stringify(parameters);
+const get_request_args = "MA_DIEMDO=S1.01_AN&TU_NGAY=8/22/2021 6:41:12&DEN_NGAY=8/24/2021 6:41:12&TOKEN=" + config.token;
+
+const Api_Options = {
+    url: "http://smart.cpc.vn/etl/api/getInfoMeter?" + get_request_args,
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+}
+
 
 const deviceCount = 1;
 const analogTagNum = 3;
@@ -162,9 +184,36 @@ exports.getById = async (req, res) => {
 
 };
 
+exports.getData = async (req, res) => {
+
+    try {
+        console.log("abcd");
+        const request = http.request(Api_Options, (response) => {
+            console.log(response);
+            res.status(200).send({data : response.message});
+        });
+
+        // In case error occurs while sending request
+        request.on('error', (error) => {
+            res.status(400).send(error);
+        });
+
+        request.end();
+
+        
+    } catch (error) {
+        console.log(error);
+        res.status(400).send({ message: "Category not exists" });
+    }
+
+};
+
+
+
 exports.removeById = (req, res) => {
     console.log("insert");
 };
+
 
 
 function prepareConfig() {
