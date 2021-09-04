@@ -2,7 +2,7 @@ const config = require('./common/config/env.config.js');
 
 const express = require('express');
 const app = express();
-// const bodyParser = require('body-parser');
+const bodyParser = require('body-parser');
 
 // const AuthorizationRouter = require('./authorization/routes.config');
 const AdministratorRouter = require('./administrators/routes.config');
@@ -22,16 +22,16 @@ app.use(function (req, res, next) {
     }
 });
 
-// app.use(bodyParser.json());
-// app.use(bodyParser.json({
-//     limit: '50mb'
-// }));
+app.use(bodyParser.json());
+app.use(bodyParser.json({
+    limit: '50mb'
+}));
 
-// app.use(bodyParser.urlencoded({
-//     limit: '50mb',
-//     parameterLimit: 100000,
-//     extended: true
-// }));
+app.use(bodyParser.urlencoded({
+    limit: '50mb',
+    parameterLimit: 100000,
+    extended: true
+}));
 
 // AuthorizationRouter.routesConfig(app);
 AdministratorRouter.routesConfig(app);

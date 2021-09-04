@@ -10,9 +10,14 @@ import {FormControl} from '@angular/forms';
 })
 export class HomeComponent implements OnInit {
   users: Object;
-  messageForm: FormGroup;
+  datahubForm: FormGroup;
   submitted = false;
   success = false;
+  connectedStatus="lightgrey";
+
+  nodeId="c7c3ec15-8247-41b0-bd67-19d69e584bda";
+  credentialKey ="9ee1f078e91a8ec2e747460324726ap6";
+  apiUrl = "https://api-dccs-ensaas.sa.wise-paas.com/";
 
 
   constructor(private data: DataService,private formBuilder: FormBuilder) {}
@@ -24,9 +29,10 @@ export class HomeComponent implements OnInit {
       console.log(this.users);
     });
 
-    this.messageForm = this.formBuilder.group({
-      name: ["", Validators.required],
-      message: ["", Validators.required],
+    this.datahubForm = this.formBuilder.group({
+      nodeId: ["", Validators.required],
+      credentialKey: ["", Validators.required],
+      apiUrl: ["", Validators.required],
     });
 
     
@@ -37,7 +43,7 @@ export class HomeComponent implements OnInit {
   onSubmit() {
     this.submitted = true;
 
-    if (this.messageForm.invalid) {
+    if (this.datahubForm.invalid) {
       return;
     }
     this.success = true;
@@ -46,6 +52,13 @@ export class HomeComponent implements OnInit {
   getDataFromAPI(){
     this.data.getDataFromAPI().subscribe(data => {
       console.log(data);
+    });
+  }
+
+  connectDatahub(){
+    this.data.connectToDatahub(this.nodeId,this.credentialKey,this.apiUrl).subscribe(data => {
+      console.log(data);
+      this.connectedStatus = "green";
     });
   }
 }

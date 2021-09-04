@@ -1,18 +1,18 @@
 
 
-<form [formGroup]="messageForm" (ngSubmit)="onSubmit()">
+<div >
 
   <div class="row">
     <div class="col-md-4">
       <h1>DataHub Edge SDK</h1>
       <div class="form-group">
         <label for="name">NodeId</label>
-        <input type="text" class="form-control">
+        <input [(ngModel)]="nodeId" type="text" class="form-control" >
       </div>
 
       <div class="form-group">
         <label >Credential Key</label>
-        <input type="text" class="form-control" >
+        <input [(ngModel)]="credentialKey" type="text" class="form-control" >
       </div>
 
       <!-- <div class="form-group">
@@ -24,7 +24,7 @@
 
       <div class="form-group">
         <label >API Url</label>
-        <input type="text" class="form-control" >
+        <input [(ngModel)]="apiUrl" type="text" class="form-control" >
       </div>
 
     </div>
@@ -32,14 +32,14 @@
     <div class="col-md-5">
 
       <div class="row">
-        <button class="col-md-12" rows="2" style="margin: 10px; height: 70px;background-color: green !important;"
+        <button class="col-md-12" rows="2" [style.background-color]="connectedStatus" style="margin: 10px; height: 70px;background-color: lightgray"
           mat-raised-button>Connected</button>
 
       </div>
 
       <div class="row">
 
-        <button class="col-md-5" style="margin: 10px;background-color: lightgrey" mat-raised-button>Connect</button>
+        <button (click)="connectDatahub()" class="col-md-5" style="margin: 10px;background-color: lightgrey" mat-raised-button>Connect</button>
         <button class="col-md-5" style="margin: 10px;background-color: lightgrey" mat-raised-button>Disconnect</button>
 
       </div>
@@ -101,7 +101,7 @@
   </div>
 
 
-</form>
+</div>
 
 <form >
   <!-- <h5 *ngIf="success">Your form is valid!</h5> -->

@@ -1,5 +1,5 @@
 
-const CategoryController = require('./controllers/datahub.controller');
+const DatahubController = require('./controllers/datahub.controller');
 // const PermissionMiddleware = require('../common/middlewares/auth.permission.middleware');
 // const ValidationMiddleware = require('../common/middlewares/auth.validation.middleware');
 const config = require('../common/config/env.config');
@@ -14,43 +14,43 @@ exports.routesConfig = function (app) {
   //Users apis
   app.get('/', [
     // ValidationMiddleware.validJWTNeeded,
-    CategoryController.home
+    DatahubController.home
   ]);
 
-  app.get('/connect', [
-    // ValidationMiddleware.validJWTNeeded,   
-    CategoryController.connectDatahub
-  ]);
+  // app.get('/connect', [
+  //   // ValidationMiddleware.validJWTNeeded,   
+  //   DatahubController.connectDatahub
+  // ]);
 
   //datahub apis
   app.get('/datahub', [
     // ValidationMiddleware.validJWTNeeded,
-    CategoryController.list
+    DatahubController.list
   ]);
   //datahub apis
   app.get('/getData', [
     // ValidationMiddleware.validJWTNeeded,
-    CategoryController.getData
+    DatahubController.getData
   ]);
-  app.post('/datahub', [
+  app.post('/connectDatahub', [
     // ValidationMiddleware.validJWTNeeded,
     // PermissionMiddleware.minimumPermissionLevelRequired,
-    CategoryController.insert
+    DatahubController.connectDatahub
   ]);
   app.put('/datahub/:id', [
     // ValidationMiddleware.validJWTNeeded,
     // PermissionMiddleware.minimumPermissionLevelRequired,
-    CategoryController.update
+    DatahubController.update
   ]);
   app.get('/datahub/:id', [
     // ValidationMiddleware.validJWTNeeded,
     // PermissionMiddleware.minimumPermissionLevelRequired,
-    CategoryController.getById
+    DatahubController.getById
   ]);
   app.delete('/datahub/:id', [
     // ValidationMiddleware.validJWTNeeded,
     // PermissionMiddleware.minimumPermissionLevelRequired,
-    CategoryController.removeById
+    DatahubController.removeById
   ]);
 
   

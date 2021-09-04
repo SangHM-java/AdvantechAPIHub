@@ -67,11 +67,13 @@ var edgeAgent = new edgeSDK.EdgeAgent(options);
 exports.connectDatahub = async (req, res) => {
     try {
         console.log("connect");
+        let datahub = {...{}, ...req.body};
+        console.log(datahub);
         options = {
             connectType: edgeSDK.constant.connectType.DCCS,
             DCCS: {
-                credentialKey: '9ee1f078e91a8ec2e747460324726ap6',
-                APIUrl: 'https://api-dccs-ensaas.sa.wise-paas.com/'
+                credentialKey: datahub.CredentialKey,
+                APIUrl: datahub.ApiUrl
             },
             // MQTT: {
             //   hostName: '127.0.0.1',
@@ -83,7 +85,7 @@ exports.connectDatahub = async (req, res) => {
             useSecure: false,
             autoReconnect: true,
             reconnectInterval: 1000,
-            nodeId: 'c7c3ec15-8247-41b0-bd67-19d69e584bda', // getting from datahub portal
+            nodeId: datahub.NodeId, // getting from datahub portal
             type: edgeSDK.constant.edgeType.Gateway, // Choice your edge is Gateway or Device, Default is Gateway
             // deviceId: 'Device1', // If type is Device, DeviceId must be filled
             heartbeat: 60000, // default is 60 seconds,
@@ -95,7 +97,6 @@ exports.connectDatahub = async (req, res) => {
 
         edgeAgent = new edgeSDK.EdgeAgent(options);
         edgeAgent.connect();
-
         edgeAgent.events.on('connected', () => {
             console.log('Connect success !');
             edgeConfig = prepareConfig();
@@ -108,9 +109,11 @@ exports.connectDatahub = async (req, res) => {
                 console.log('upload config error');
                 console.log(error);
             });
+            
         });
         edgeAgent.events.on('disconnected', () => {
             console.log('Disconnected... ');
+            
         });
         edgeAgent.events.on('messageReceived', (msg) => {
             switch (msg.type) {
@@ -127,13 +130,17 @@ exports.connectDatahub = async (req, res) => {
                     break;
             }
         });
-
+       
+        return res.status(200).send({message:"ok"});
 
     } catch (error) {
+        console.log(error);
         return res.status(400).send(error);
     }
 
 };
+
+
 
 exports.insert = async (req, res) => {
     try {
