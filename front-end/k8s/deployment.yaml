@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apihub-frontendv5
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      component: web
+      student: sanghm
+  template:
+    metadata:
+      labels:
+        component: web
+        student: sanghm
+    spec:
+      containers:
+        - name: static
+          image: hominhsangadvantech/front-end:v5
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              cpu: 20m
+              memory: 32Mi
+              ephemeral-storage: 32Mi
+            requests:
+              cpu: 10m
+              memory: 32Mi

@@ -164,7 +164,7 @@ exports.list = async (req, res) => {
     const { website } = req.query;
     try {
         console.log("insert");
-        return res.status(201).send({});
+        return res.status(201).send({message:"oke"});
     } catch (error) {
         return res.status(400).send(error);
     }

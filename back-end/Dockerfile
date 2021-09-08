@@ -1,15 +1,16 @@
-FROM node:11-alpine
+FROM node:latest
+# FROM nginx
 
 RUN mkdir -p /usr/src/app
 
 WORKDIR /usr/src/app
 
 COPY . .
+# COPY / /usr/share/nginx/html
+# COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 
-RUN sed -i "s/mongodb:\/\/localhost/mongodb:\/\/mongo/g" common/services/mongoose.service.js
+# RUN sed -i "s/mongodb:\/\/localhost/mongodb:\/\/mongo/g" common/services/mongoose.service.js
 
 RUN npm install
-
-EXPOSE 3600
 
 CMD ["npm", "run", "start"]

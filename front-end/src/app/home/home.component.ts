@@ -24,10 +24,10 @@ export class HomeComponent implements OnInit {
 
   // on init the Dataservice getUsers() function supplies a user array object.
   ngOnInit() {
-    this.data.getUsers().subscribe(data => {
-      this.users = data;
-      console.log(this.users);
-    });
+    // this.data.getUsers().subscribe(data => {
+    //   this.users = data;
+    //   console.log(this.users);
+    // });
 
     this.datahubForm = this.formBuilder.group({
       nodeId: ["", Validators.required],

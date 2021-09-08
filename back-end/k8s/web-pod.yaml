@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-pod-sanghm
+  labels:
+    component: web
+spec:
+  containers:
+    - name: server
+      image: hominhsangadvantech/back-end-k8s:v1
+      ports:
+        - containerPort: 8080
+      resources:
+            limits:
+              cpu: 20m
+              memory: 32Mi
+              ephemeral-storage: 32Mi
+            requests:
+              cpu: 10m
+              memory: 32Mi
