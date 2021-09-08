@@ -10,6 +10,7 @@ import {FormControl} from '@angular/forms';
 })
 export class HomeComponent implements OnInit {
   users: Object;
+  apidata: Object;
   datahubForm: FormGroup;
   submitted = false;
   success = false;
@@ -20,7 +21,7 @@ export class HomeComponent implements OnInit {
   apiUrl = "https://api-dccs-ensaas.sa.wise-paas.com/";
 
 
-  constructor(private data: DataService,private formBuilder: FormBuilder) {}
+  constructor(private dataService: DataService,private formBuilder: FormBuilder) {}
 
   // on init the Dataservice getUsers() function supplies a user array object.
   ngOnInit() {
@@ -49,16 +50,17 @@ export class HomeComponent implements OnInit {
     this.success = true;
   }
 
-  getDataFromAPI(){
-    this.data.getDataFromAPI().subscribe(data => {
+  connectDatahub(){
+    this.dataService.connectToDatahub(this.nodeId,this.credentialKey,this.apiUrl).subscribe(data => {
       console.log(data);
+      this.connectedStatus = "green";
     });
   }
 
-  connectDatahub(){
-    this.data.connectToDatahub(this.nodeId,this.credentialKey,this.apiUrl).subscribe(data => {
+  getDataFromAPI(){
+    this.dataService.getDataFromAPI().subscribe(data => {
       console.log(data);
-      this.connectedStatus = "green";
+      this.apidata = data;
     });
   }
 }

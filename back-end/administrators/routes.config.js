@@ -17,10 +17,14 @@ exports.routesConfig = function (app) {
     DatahubController.home
   ]);
 
-  // app.get('/connect', [
-  //   // ValidationMiddleware.validJWTNeeded,   
-  //   DatahubController.connectDatahub
-  // ]);
+
+  app.get('/sendDataAPIToDatahub', [
+    DatahubController.sendDataAPIToDatahub
+  ]);
+
+  app.get('/getDataFromAPI', [
+    DatahubController.getDataFromAPI
+  ]);
 
   //datahub apis
   app.get('/datahub', [
@@ -28,9 +32,9 @@ exports.routesConfig = function (app) {
     DatahubController.list
   ]);
   //datahub apis
-  app.get('/getData', [
+  app.get('/getTokenFromAPI', [
     // ValidationMiddleware.validJWTNeeded,
-    DatahubController.getData
+    DatahubController.getTokenFromAPI
   ]);
   app.post('/connectDatahub', [
     // ValidationMiddleware.validJWTNeeded,

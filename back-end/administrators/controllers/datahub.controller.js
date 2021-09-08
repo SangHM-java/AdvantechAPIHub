@@ -10,6 +10,7 @@ const config = require('../../common/config/env.config');
 const http = require('http');
 const querystring = require('querystring');
 const edgeSDK = require('wisepaas-datahub-edge-nodejs-sdk');
+var request = require('request');
 
 // GET parameters
 const parameters = {
@@ -19,16 +20,27 @@ const parameters = {
     TOKEN: config.token
 }
 
-// const get_request_args = querystring.stringify(parameters);
-const get_request_args = "MA_DIEMDO=S1.01_AN&TU_NGAY=8/22/2021 6:41:12&DEN_NGAY=8/24/2021 6:41:12&TOKEN=" + config.token;
-
-const Api_Options = {
-    url: "http://smart.cpc.vn/etl/api/getInfoMeter?" + get_request_args,
-    headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-    }
-}
-
+const headers = {
+    'Accept': '*/*',
+    'Accept-Language': 'en-US,en;q=0.9,es;q=0.8',
+    'Connection': 'keep-alive',
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'DNT': '1',
+    'Origin': 'https://www.netflix.com',
+    'Referer': 'https://www.netflix.com/browse/my-list',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36',
+    'X-Netflix.browserName': 'Chrome',
+    'X-Netflix.browserVersion': '75',
+    'X-Netflix.clientType': 'akira',
+    'X-Netflix.esnPrefix': 'NFCDCH-02-',
+    'X-Netflix.osFullName': 'Windows 10',
+    'X-Netflix.osName': 'Windows',
+    'X-Netflix.osVersion': '10.0',
+    'X-Netflix.playerThroughput': '58194',
+    'X-Netflix.uiVersion': 'v73fa49e3',
+    'cache-control': 'no-cache',
+    'Cookie': ''
+};
 
 const deviceCount = 1;
 const analogTagNum = 3;
@@ -64,10 +76,61 @@ var sendTimer = {};
 var edgeConfig = {};
 var edgeAgent = new edgeSDK.EdgeAgent(options);
 
+var api_data = []
+
+exports.getDataFromAPI = async (req, res) => {
+
+    try {
+
+        let get_token_options = {
+            json: true,
+            url: 'http://smart.cpc.vn/etl/api/login?USER_NAME=chaunm&PASSWORD=chaunm123',
+            method: 'GET',
+            headers: headers,
+            //body: dataString
+        };
+        let TOKEN = "";
+
+        request(get_token_options, (error, response, body) => {
+            if (!error && response.statusCode == 200) {
+
+                TOKEN = body.data.TOKEN;
+                //res.status(200).send({TOKEN : body.data.data.TOKEN});
+                // const get_request_args = querystring.stringify(parameters);
+                let get_request_args = "MA_DIEMDO=S1.01_AN&TU_NGAY=8/22/2021 6:41:12&DEN_NGAY=8/24/2021 6:41:12&TOKEN=" + TOKEN;
+
+                let get_data_options = {
+                    json: true,
+                    url: 'http://smart.cpc.vn/etl/api/getInfoMeter?' + get_request_args,
+                    method: 'GET',
+                    headers: headers,
+                    //body: dataString
+                };
+
+
+                request(get_data_options, (error, response, body) => {
+                    if (!error && response.statusCode == 200) {
+                        api_data = body.data;
+                        res.status(200).send({ data: body });
+                    }
+                });
+            }
+        });
+
+
+
+
+    } catch (error) {
+        console.log(error);
+        res.status(400).send({ message: "Category not exists" });
+    }
+
+};
+
 exports.connectDatahub = async (req, res) => {
     try {
         console.log("connect");
-        let datahub = {...{}, ...req.body};
+        let datahub = { ...{}, ...req.body };
         console.log(datahub);
         options = {
             connectType: edgeSDK.constant.connectType.DCCS,
@@ -104,16 +167,17 @@ exports.connectDatahub = async (req, res) => {
                 // when mqtt disconnect happened, and automatically reconnect
                 // clear interval to prevent duplicate time interval call
                 clearInterval(sendTimer);
-                sendTimer = setInterval(sendData, 2000);
+                // sendTimer = setInterval(sendData, 2000);
+                sendData();
             }, error => {
                 console.log('upload config error');
                 console.log(error);
             });
-            
+
         });
         edgeAgent.events.on('disconnected', () => {
             console.log('Disconnected... ');
-            
+
         });
         edgeAgent.events.on('messageReceived', (msg) => {
             switch (msg.type) {
@@ -130,12 +194,140 @@ exports.connectDatahub = async (req, res) => {
                     break;
             }
         });
-       
-        return res.status(200).send({message:"ok"});
+
+        return res.status(200).send({ message: "ok" });
 
     } catch (error) {
         console.log(error);
         return res.status(400).send(error);
+    }
+
+};
+
+exports.getTokenFromAPI = async (req, res) => {
+
+    try {
+        console.log("getTokenFromAPI");
+
+        const get_token_options = {
+            json: true,
+            url: 'http://smart.cpc.vn/etl/api/login?USER_NAME=chaunm&PASSWORD=chaunm123',
+            method: 'GET',
+            headers: headers,
+            //body: dataString
+        };
+
+        request(get_token_options, (error, response, body) => {
+            if (!error && response.statusCode == 200) {
+
+                res.status(200).send({ TOKEN: body.data.data.TOKEN });
+            }
+        });
+
+
+    } catch (error) {
+        console.log(error);
+        res.status(400).send({ message: "Category not exists" });
+    }
+
+};
+
+exports.sendDataAPIToDatahub = async (req, res) => {
+
+    try {
+        console.log("sendDataAPIToDatahub");
+        let get_token_options = {
+            json: true,
+            url: 'http://smart.cpc.vn/etl/api/login?USER_NAME=chaunm&PASSWORD=chaunm123',
+            method: 'GET',
+            headers: headers,
+            //body: dataString
+        };
+        let TOKEN = "";
+
+        request(get_token_options, (error, response, body) => {
+            if (!error && response.statusCode == 200) {
+                TOKEN = body.data.TOKEN;
+                //res.status(200).send({TOKEN : body.data.data.TOKEN});
+                // const get_request_args = querystring.stringify(parameters);
+                let get_request_args = "MA_DIEMDO=S1.01_AN&TU_NGAY=8/22/2021 6:41:12&DEN_NGAY=8/24/2021 6:41:12&TOKEN=" + TOKEN;
+
+                let get_data_options = {
+                    json: true,
+                    url: 'http://smart.cpc.vn/etl/api/getInfoMeter?' + get_request_args,
+                    method: 'GET',
+                    headers: headers,
+                    //body: dataString
+                };
+
+
+                request(get_data_options, (error, response, body) => {
+                    if (!error && response.statusCode == 200) {
+                        api_data = body.data;
+                        let data = new edgeSDK.EdgeData();
+                        let datahub_data = api_data[0];
+                        console.log(datahub_data);
+
+                        let edgeConfig = new edgeSDK.EdgeConfig();
+                        let textTagList = [];
+
+                        for (let i = 1; i <= deviceCount; i++) {
+                            for (const property2 in datahub_data) {
+                                if (datahub_data[property2] != null && datahub_data[property2] != "null") {
+                                    let TTag = new edgeSDK.EdgeDataTag();
+
+                                    TTag.deviceId = 'Device' + i;
+                                    TTag.tagName = property2;
+                                    TTag.value = "" + datahub_data[property2];
+                                    data.tagList.push(TTag);
+                                }
+
+                            }
+                        }
+
+                        for (let i = 1; i <= deviceCount; i++) {
+                            let deviceConfig = new edgeSDK.DeviceConfig();
+                            deviceConfig.id = 'Device' + i;
+                            deviceConfig.name = 'Device' + i;
+                            deviceConfig.type = 'Smart Device';
+                            deviceConfig.description = 'Device ' + i;
+
+                            for (const property1 in datahub_data) {
+                                let textTagConfig = new edgeSDK.TextTagConfig();
+                                textTagConfig.name = property1;
+                                textTagConfig.description = '' + datahub_data[property1];
+                                textTagList.push(textTagConfig);
+                            }
+
+                            deviceConfig.textTagList = textTagList;
+
+                            edgeConfig.node.deviceList.push(deviceConfig);
+                        }
+
+                        edgeAgent.uploadConfig(edgeSDK.constant.actionType.create, edgeConfig).then((res2) => {
+                            edgeAgent.sendData(data);
+                            console.log(res2);
+                            res.status(200).send({ message: res2 });
+                        }, error => {
+                            console.log('upload config error');
+                            console.log(error);
+                        });
+
+
+
+
+                    }
+                });
+            }
+        });
+
+
+
+
+
+    } catch (error) {
+        console.log(error);
+        res.status(400).send({ message: "Category not exists" });
     }
 
 };
@@ -164,7 +356,7 @@ exports.list = async (req, res) => {
     const { website } = req.query;
     try {
         console.log("insert");
-        return res.status(201).send({message:"oke"});
+        return res.status(201).send({ message: "oke" });
     } catch (error) {
         return res.status(400).send(error);
     }
@@ -191,29 +383,6 @@ exports.getById = async (req, res) => {
 
 };
 
-exports.getData = async (req, res) => {
-
-    try {
-        console.log("abcd");
-        const request = http.request(Api_Options, (response) => {
-            console.log(response);
-            res.status(200).send({data : response.message});
-        });
-
-        // In case error occurs while sending request
-        request.on('error', (error) => {
-            res.status(400).send(error);
-        });
-
-        request.end();
-
-        
-    } catch (error) {
-        console.log(error);
-        res.status(400).send({ message: "Category not exists" });
-    }
-
-};
 
 
 
@@ -243,7 +412,7 @@ function prepareConfig() {
         }
         for (let j = 1; j <= discreteTagNum; j++) {
             let discreteTagConfig = new edgeSDK.DiscreteTagConfig();
-            discreteTagConfig.name = 'DTag' + j;
+            discreteTagConfig.name = 'hominhsang' + j;
             discreteTagConfig.description = 'DTag' + j;
             discreteTagList.push(discreteTagConfig);
         }
@@ -274,6 +443,7 @@ function sendData() {
         return;
     }
     let data = prepareData();
+    console.log(data);
     edgeAgent.sendData(data);
 }
 function prepareData() {
@@ -282,7 +452,7 @@ function prepareData() {
         for (let j = 1; j <= analogTagNum; j++) {
             let ATag = new edgeSDK.EdgeDataTag();
             ATag.deviceId = 'Device' + i;
-            ATag.tagName = 'ATag' + j;
+            ATag.tagName = 'hominhsang' + j;
             ATag.value = Math.floor(Math.random() * 100) + 1;
             data.tagList.push(ATag);
         }
@@ -382,4 +552,10 @@ function deleteTagConfig() {
 function deleteAllConfig() {
     let edgeConfig = new edgeSDK.EdgeConfig();
     return edgeConfig;
+}
+
+function callback(error, response, body) {
+    if (!error && response.statusCode == 200) {
+        console.log(body);
+    }
 }

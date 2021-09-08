@@ -18,13 +18,12 @@ export class DataService {
   }
 
   connectToDatahub(nodeId,credentialKey,apiUrl) {
-    return this.http.post<any>('http://127.0.0.1:3600/connectDatahub',
+    return this.http.post<any>('http://127.0.0.1:8080/connectDatahub',
      { NodeId: nodeId,CredentialKey:credentialKey,ApiUrl:apiUrl});
   }
 
   getDataFromAPI() {
-    console.log('abcd')
-    return this.http.get("http://smart.cpc.vn/etl/api/getInfoMeter?MA_DIEMDO=S1.01_AN&TU_NGAY=8/22/2021 6:41:12&DEN_NGAY=8/24/2021 6:41:12&TOKEN=vkRzNEVOtB4UsqrDOI3VEQY4/IQhg9r73hc7IOhfsgEsPjDjaGIrc0jr/n3cXUAzX17AlRr5wojLJb846vuQPckHeZbZh4sh7xOF3wx6I9F6snPS/U6jHNCEKePQN0W1lKy1UU1/fr0OXbg/pq6D4vjCKZldTxEMlQ2aifA=",{ 'headers': this.headers });
-  }
+    return this.http.get<any>('http://127.0.0.1:8080/getDataFromAPI');
 
+  }
 }
