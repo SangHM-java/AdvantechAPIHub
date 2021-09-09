@@ -1,4 +1,4 @@
-// const CategoryModel = require('../models/datahub.model');
+// const DatahubModel = require('../models/datahub.model');
 // const crypto = require('crypto');
 // const Utils = require("../../libs/Utils");
 // const Validator = require("../../libs/Validator");
@@ -122,7 +122,7 @@ exports.getDataFromAPI = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(400).send({ message: "Category not exists" });
+        res.status(400).send({ message: "Datahub not exists" });
     }
 
 };
@@ -227,7 +227,7 @@ exports.getTokenFromAPI = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(400).send({ message: "Category not exists" });
+        res.status(400).send({ message: "Datahub not exists" });
     }
 
 };
@@ -327,7 +327,7 @@ exports.sendDataAPIToDatahub = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(400).send({ message: "Category not exists" });
+        res.status(400).send({ message: "Datahub not exists" });
     }
 
 };
@@ -378,7 +378,7 @@ exports.getById = async (req, res) => {
     try {
         console.log("insert");
     } catch (error) {
-        res.status(400).send({ message: "Category not exists" });
+        res.status(400).send({ message: "Datahub not exists" });
     }
 
 };
