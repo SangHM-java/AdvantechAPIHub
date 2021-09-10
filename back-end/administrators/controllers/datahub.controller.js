@@ -142,7 +142,7 @@ exports.getDataFromAPI = async (req, res) => {
 
                 let get_data_options = {
                     json: true,
-                    url: 'http://smart.cpc.vn/etl/api/getInfoMeter?' + get_request_args,
+                    url: 'https://smart.cpc.vn/etl/api/getAllInfoMeter?' + TOKEN,
                     method: 'GET',
                     headers: headers,
                     //body: dataString
@@ -317,7 +317,7 @@ exports.sendDataAPIToDatahub = async (req, res) => {
 
                 let get_data_options = {
                     json: true,
-                    url: 'http://smart.cpc.vn/etl/api/getInfoMeter?' + get_request_args,
+                    url: 'https://smart.cpc.vn/etl/api/getAllInfoMeter?' + TOKEN,
                     method: 'GET',
                     headers: headers,
                     //body: dataString
@@ -353,8 +353,8 @@ exports.sendDataAPIToDatahub = async (req, res) => {
                             let datahub_data = api_data[i];
 
                             let deviceConfig = new edgeSDK.DeviceConfig();
-                            deviceConfig.id = datahub_data["MA_DIEMDO"];
-                            deviceConfig.name = 'Device' + i;
+                            deviceConfig.id = 'Device' + i ;
+                            deviceConfig.name = 'Device' + i + "_" + datahub_data["MA_DIEMDO"];
                             deviceConfig.type = 'Smart Device';
                             deviceConfig.description = datahub_data["MA_DIEMDO"];
 
