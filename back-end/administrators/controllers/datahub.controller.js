@@ -380,14 +380,22 @@ exports.sendDataAPIToDatahub = async (req, res) => {
                             data.tagList.push(TTagc);
 
                             let TTagCoshphi = new edgeSDK.EdgeDataTag();
-                            let average = a != 0 && b != 0 && b != 0 && a != null && b != null && c != null ? 3 : 1;
+                            let average = datahub_data["COSPCHI_PHASE_A"] != 0
+                             && datahub_data["COSPHI_PHASE_B"] != 0 
+                             && datahub_data["COSPHI_PHASE_C"] != 0 
+                             && datahub_data["COSPHI_PHASE_A"] != null 
+                             && datahub_data["COSPHI_PHASE_B"] != null 
+                             && datahub_data["COSPHI_PHASE_C"] != null ? 3 : 1;
                             TTagCoshphi.deviceId = 'Device' + i;
                             TTagCoshphi.tagName = "Coshphi";
-                            TTagCoshphi.value = (a + b + c) / average;
+                            TTagCoshphi.value = (datahub_data["COSPHI_PHASE_A"] + datahub_data["COSPHI_PHASE_B"] + datahub_data["COSPHI_PHASE_C"]) / average;
                             data.tagList.push(TTagCoshphi);
 
                             console.log(average);
                             console.log("KQ");
+                            console.log(datahub_data["COSPHI_PHASE_A"]);
+                            console.log(Math.cosh(datahub_data["COSPHI_PHASE_A"]));
+                            console.log(a,b,c);
                             console.log((a + b + c) / average);
                         }
 
