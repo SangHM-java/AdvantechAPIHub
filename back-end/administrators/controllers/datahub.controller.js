@@ -401,7 +401,7 @@ exports.sendDataAPIToDatahub = async (req, res) => {
 };
 
 function sendDataInterval(){
-    console.log("sendDataAPIToDatahub");
+    console.log("sendDataAPIToDatahub 30s interval");
         let get_token_options = {
             json: true,
             url: 'http://smart.cpc.vn/etl/api/login?USER_NAME=chaunm&PASSWORD=chaunm123',
