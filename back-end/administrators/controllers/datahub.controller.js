@@ -356,36 +356,39 @@ exports.sendDataAPIToDatahub = async (req, res) => {
                             }
 
                             let TTaga = new edgeSDK.EdgeDataTag();
+                            let a = Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_A"])) * datahub_data["ACTIVE_POWER_PHASE_A"];
+                            let b = Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_B"])) * datahub_data["ACTIVE_POWER_PHASE_B"];
+                            let c =  Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_C"])) * datahub_data["ACTIVE_POWER_PHASE_C"]
 
                             TTaga.deviceId = 'Device' + i;
                             TTaga.tagName = "Qa";
-                            TTaga.value = Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_A"])) * datahub_data["ACTIVE_POWER_PHASE_A"];
+                            TTaga.value = a ;
                             data.tagList.push(TTaga);
 
                             let TTagb = new edgeSDK.EdgeDataTag();
 
                             TTagb.deviceId = 'Device' + i;
                             TTagb.tagName = "Qb";
-                            TTagb.value = Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_B"])) * datahub_data["ACTIVE_POWER_PHASE_B"];
+                            TTagb.value = b;
                             data.tagList.push(TTagb);
 
                             let TTagc = new edgeSDK.EdgeDataTag();
 
                             TTagc.deviceId = 'Device' + i;
                             TTagc.tagName = "Qc";
-                            TTagc.value = Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_C"])) * datahub_data["ACTIVE_POWER_PHASE_C"];
+                            TTagc.value =c;
                             data.tagList.push(TTagc);
 
                             let TTagCoshphi = new edgeSDK.EdgeDataTag();
-                            let average = TTaga.value != 0 && TTagb != 0 && TTagc != 0 ? 3 : 1;
+                            let average = a != 0 && b != 0 && b != 0 && a != null && b != null && c != null ? 3 : 1;
                             TTagCoshphi.deviceId = 'Device' + i;
                             TTagCoshphi.tagName = "Coshphi";
-                            TTagCoshphi.value = (TTaga.value + TTagb.value + TTagc.value) / average;
+                            TTagCoshphi.value = (a + b + c) / average;
                             data.tagList.push(TTagCoshphi);
 
                             console.log(average);
                             console.log("KQ");
-                            console.log((TTaga.value + TTagb.value + TTagc.value) / average);
+                            console.log((a + b + c) / average);
                         }
 
                         for (let i = 0; i < limit; i++) {
