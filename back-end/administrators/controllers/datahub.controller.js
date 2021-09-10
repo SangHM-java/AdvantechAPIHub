@@ -353,8 +353,8 @@ exports.sendDataAPIToDatahub = async (req, res) => {
                             let datahub_data = api_data[i];
 
                             let deviceConfig = new edgeSDK.DeviceConfig();
-                            deviceConfig.id = datahub_data["MA_DIEMDO"];
-                            deviceConfig.name = 'Device' + i;
+                            deviceConfig.id = 'Device' + i ;
+                            deviceConfig.name = 'Device' + i + "_" + datahub_data["MA_DIEMDO"];
                             deviceConfig.type = 'Smart Device';
                             deviceConfig.description = datahub_data["MA_DIEMDO"];
 
