@@ -1,18 +1,16 @@
-
-
-<div >
+<div>
 
   <div class="row">
     <div class="col-md-4">
       <h1>DataHub Edge SDK</h1>
       <div class="form-group">
         <label for="name">NodeId</label>
-        <input [(ngModel)]="nodeId" type="text" class="form-control" >
+        <input [(ngModel)]="nodeId" type="text" class="form-control">
       </div>
 
       <div class="form-group">
-        <label >Credential Key</label>
-        <input [(ngModel)]="credentialKey" type="text" class="form-control" >
+        <label>Credential Key</label>
+        <input [(ngModel)]="credentialKey" type="text" class="form-control">
       </div>
 
       <!-- <div class="form-group">
@@ -23,8 +21,8 @@
       </div> -->
 
       <div class="form-group">
-        <label >API Url</label>
-        <input [(ngModel)]="apiUrl" type="text" class="form-control" >
+        <label>API Url</label>
+        <input [(ngModel)]="apiUrl" type="text" class="form-control">
       </div>
 
     </div>
@@ -32,22 +30,25 @@
     <div class="col-md-5">
 
       <div class="row">
-        <button class="col-md-12" rows="2" [style.background-color]="connectedStatus" style="margin: 10px; height: 70px;background-color: lightgray"
-          mat-raised-button>Connected</button>
+        <button class="col-md-12" rows="2" [style.background-color]="connectedStatus"
+          style="margin: 10px; height: 70px;background-color: lightgray" mat-raised-button>Connected</button>
 
       </div>
 
       <div class="row">
 
-        <button (click)="connectDatahub()" class="col-md-5" style="margin: 10px;background-color: lightgrey" mat-raised-button>Connect</button>
-        <button class="col-md-5" style="margin: 10px;background-color: lightgrey" mat-raised-button>Disconnect</button>
+        <button (click)="connectDatahub()" class="col-md-5" style="margin: 10px;background-color: lightgrey"
+          mat-raised-button>Connect</button>
+        <button (click)="disconnectDatahub()" class="col-md-5" style="margin: 10px;background-color: lightgrey"
+          mat-raised-button>Disconnect</button>
 
       </div>
 
       <div class="row">
 
 
-        <button class="col-md-5" style="margin: 10px;background-color: lightgrey" mat-raised-button>Send Data</button>
+        <button (click)="sendDataAPIToDatahub()" class="col-md-5" style="margin: 10px;background-color: lightgrey"
+          mat-raised-button>Send Data</button>
         <!-- <button class="col-md-5" style="margin: 10px;background-color: lightgrey" mat-raised-button disabled>Upload Config </button> -->
 
       </div>
@@ -57,7 +58,7 @@
         <button class="col-md-5" style="margin: 10px;background-color: lightgrey" mat-raised-button disabled>Update
           device status </button>
       </div>
-      
+
 
     </div>
 
@@ -77,25 +78,25 @@
     <div class="col-md-3">
       <div class="form-group">
         <label for="name">Analog Tag Count</label>
-        <input type="text" class="form-control" value="5" >
+        <input type="text" class="form-control" value="5">
       </div>
     </div>
     <div class="col-md-3">
       <div class="form-group">
         <label for="name">Discrete Tag Count</label>
-        <input type="text" class="form-control" value="5" id="name" >
+        <input type="text" class="form-control" value="5" id="name">
       </div>
     </div>
     <div class="col-md-3">
       <div class="form-group">
         <label for="name">Text Tag Count</label>
-        <input type="text" class="form-control" value="5" id="name" >
+        <input type="text" class="form-control" value="5" id="name">
       </div>
     </div>
     <div class="col-md-3">
       <div class="form-group">
         <label for="name">Data Frequency</label>
-        <input type="text" class="form-control" value="1" id="name" >
+        <input type="text" class="form-control" value="1" id="name">
       </div>
     </div>
   </div>
@@ -103,7 +104,7 @@
 
 </div>
 
-<form >
+<form>
   <!-- <h5 *ngIf="success">Your form is valid!</h5> -->
 
   <div class="row" style="padding-top:50px">
@@ -113,13 +114,58 @@
     </div>
 
     <div class="col-md-12">
-     <span> <strong>Url: </strong>http://smart.cpc.vn/etl/api/getInfoMeter</span>
-     <button (click)="getDataFromAPI()" style="margin: 10px;" color="primary" mat-raised-button>Get Data From API</button>     <br>
-     <br>
-     {{apidata | json}}
-     <!-- <mat-card>{{users | json}}</mat-card>
+      <span> <strong>Url: </strong>http://smart.cpc.vn/etl/api/getInfoMeter</span>
+      <button (click)="getDataFromAPI()" style="margin: 10px;" color="primary" mat-raised-button>Get Data From
+        API</button> <br>
+      <br>
+      <!-- {{apidata | json}} -->
+      <!-- <mat-card>{{users | json}}</mat-card>
       -->
     </div>
+  </div>
+
+  <div class="row">
+    <mat-tab-group>
+      <mat-tab label="API Data"> {{apidata | json}} </mat-tab>
+      <mat-tab label="Datahub API Data Received">
+        <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+          <!--- Note that these columns can be defined in any order.
+                The actual rendered columns are set as a property on the row definition" -->
+
+          <!-- Position Column -->
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef> Device </th>
+            <td mat-cell *matCellDef="let element"> {{element.id}} </td>
+          </ng-container>
+
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef> Name </th>
+            <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+          </ng-container>
+
+          <!-- Weight Column -->
+          <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef> Code </th>
+            <td mat-cell *matCellDef="let element"> {{element.description}} </td>
+          </ng-container>
+
+          <!-- Symbol Column -->
+          <ng-container matColumnDef="count">
+            <th mat-header-cell *matHeaderCellDef> Tag Count </th>
+            <td mat-cell *matCellDef="let element"> {{element.textTagList.length}} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+
+
+      </mat-tab>
+      <!-- <mat-tab label="Third"> Content 3 </mat-tab> -->
+    </mat-tab-group>
   </div>
 
 

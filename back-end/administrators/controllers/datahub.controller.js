@@ -6,6 +6,7 @@
 // const { v4: uuidv4 } = require('uuid');
 // const fs = require('fs');
 // const uploadPath = require('../../common/config/env.config.js').upload_path;
+const fs = require('fs');
 const config = require('../../common/config/env.config');
 const http = require('http');
 const querystring = require('querystring');
@@ -78,6 +79,46 @@ var edgeAgent = new edgeSDK.EdgeAgent(options);
 
 var api_data = []
 
+function writeConfigFile(datahub) {
+    //nodeId: datahub.NodeId,credentialKey:datahub.CredentialKey,apiUrl :datahub.ApiUrl
+    // json data
+    // var jsonData = '{"config":{"nodeId":"' + datahub.NodeId +'","credentialKey":"' + datahub.CredentialKey+ '",apiUrl:"'+ datahub.ApiUrl + '"}}';
+
+    // parse json
+    // var jsonObj = JSON.parse(jsonData);
+    //console.log(jsonObj);
+
+    // stringify JSON Object
+    var jsonContent = JSON.stringify(datahub);
+    console.log(jsonContent);
+
+    fs.writeFile("datahub_config.json", jsonContent, 'utf8', function (err) {
+        if (err) {
+            console.log("An error occured while writing JSON Object to File.");
+            return console.log(err);
+        }
+
+        console.log("JSON file has been saved.");
+    });
+
+}
+
+exports.getConfigDatahub = async (req, res) => {
+    try {
+
+        let rawdata = fs.readFileSync('datahub_config.json');
+        let data = JSON.parse(rawdata);
+
+        return res.status(200).send({ config: data });
+
+
+    } catch (error) {
+        console.log(error);
+        return res.status(400).send(error);
+    }
+
+};
+
 exports.getDataFromAPI = async (req, res) => {
 
     try {
@@ -132,6 +173,8 @@ exports.connectDatahub = async (req, res) => {
         console.log("connect");
         let datahub = { ...{}, ...req.body };
         console.log(datahub);
+        // writeJsonFile('datahub_config.json', {nodeId: datahub.NodeId,credentialKey:datahub.CredentialKey,apiUrl :datahub.ApiUrl});
+        writeConfigFile(datahub);
         options = {
             connectType: edgeSDK.constant.connectType.DCCS,
             DCCS: {
@@ -204,6 +247,26 @@ exports.connectDatahub = async (req, res) => {
 
 };
 
+exports.disconnectDatahub = async (req, res) => {
+    try {
+
+        if (edgeAgent != null) edgeAgent.disconnect();
+        console.log('Disconnected... ');
+        edgeAgent.events.on('disconnected', () => {
+            console.log('Disconnected... ');
+            return res.status(200).send({ message: "disconnected" });
+        });
+
+        return res.status(200).send({ message: "error" });
+
+
+    } catch (error) {
+        console.log(error);
+        return res.status(400).send(error);
+    }
+
+};
+
 exports.getTokenFromAPI = async (req, res) => {
 
     try {
@@ -265,13 +328,14 @@ exports.sendDataAPIToDatahub = async (req, res) => {
                     if (!error && response.statusCode == 200) {
                         api_data = body.data;
                         let data = new edgeSDK.EdgeData();
-                        let datahub_data = api_data[0];
-                        console.log(datahub_data);
-
+                        //let datahub_data = api_data[0];
                         let edgeConfig = new edgeSDK.EdgeConfig();
                         let textTagList = [];
 
-                        for (let i = 1; i <= deviceCount; i++) {
+
+                        for (let i = 0; i < api_data.length; i++) {
+                            let datahub_data = api_data[i];
+
                             for (const property2 in datahub_data) {
                                 if (datahub_data[property2] != null && datahub_data[property2] != "null") {
                                     let TTag = new edgeSDK.EdgeDataTag();
@@ -285,12 +349,14 @@ exports.sendDataAPIToDatahub = async (req, res) => {
                             }
                         }
 
-                        for (let i = 1; i <= deviceCount; i++) {
+                        for (let i = 0; i < api_data.length; i++) {
+                            let datahub_data = api_data[i];
+
                             let deviceConfig = new edgeSDK.DeviceConfig();
                             deviceConfig.id = 'Device' + i;
                             deviceConfig.name = 'Device' + i;
                             deviceConfig.type = 'Smart Device';
-                            deviceConfig.description = 'Device ' + i;
+                            deviceConfig.description = datahub_data["MA_DIEMDO"];
 
                             for (const property1 in datahub_data) {
                                 let textTagConfig = new edgeSDK.TextTagConfig();
@@ -307,12 +373,11 @@ exports.sendDataAPIToDatahub = async (req, res) => {
                         edgeAgent.uploadConfig(edgeSDK.constant.actionType.create, edgeConfig).then((res2) => {
                             edgeAgent.sendData(data);
                             console.log(res2);
-                            res.status(200).send({ message: res2 });
+                            res.status(200).send({ message: res2 , deviceList : edgeConfig.node.deviceList});
                         }, error => {
                             console.log('upload config error');
                             console.log(error);
                         });
-
 
 
 

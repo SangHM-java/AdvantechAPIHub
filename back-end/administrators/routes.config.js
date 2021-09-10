@@ -22,14 +22,18 @@ exports.routesConfig = function (app) {
     DatahubController.sendDataAPIToDatahub
   ]);
 
+  app.get('/disconnectDatahub', [
+    DatahubController.disconnectDatahub
+  ]);
+
   app.get('/getDataFromAPI', [
     DatahubController.getDataFromAPI
   ]);
 
   //datahub apis
-  app.get('/datahub', [
+  app.get('/getConfigDatahub', [
     // ValidationMiddleware.validJWTNeeded,
-    DatahubController.list
+    DatahubController.getConfigDatahub
   ]);
   //datahub apis
   app.get('/getTokenFromAPI', [
