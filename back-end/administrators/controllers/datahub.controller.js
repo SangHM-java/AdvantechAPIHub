@@ -337,7 +337,7 @@ exports.sendDataAPIToDatahub = async (req, res) => {
                         let edgeConfig = new edgeSDK.EdgeConfig();
                         let textTagList = [];
 
-                        let limit = api_data.length;
+                        let limit = api_data.length ;
                         console.log(api_data.length);
                         //>= 10 ? 10 : api_data.length
                         for (let i = 0; i < limit; i++) {
@@ -354,6 +354,38 @@ exports.sendDataAPIToDatahub = async (req, res) => {
                                 }
 
                             }
+
+                            let TTaga = new edgeSDK.EdgeDataTag();
+
+                            TTaga.deviceId = 'Device' + i;
+                            TTaga.tagName = "Qa";
+                            TTaga.value = Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_A"])) * datahub_data["ACTIVE_POWER_PHASE_A"];
+                            data.tagList.push(TTaga);
+
+                            let TTagb = new edgeSDK.EdgeDataTag();
+
+                            TTagb.deviceId = 'Device' + i;
+                            TTagb.tagName = "Qb";
+                            TTagb.value = Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_B"])) * datahub_data["ACTIVE_POWER_PHASE_B"];
+                            data.tagList.push(TTagb);
+
+                            let TTagc = new edgeSDK.EdgeDataTag();
+
+                            TTagc.deviceId = 'Device' + i;
+                            TTagc.tagName = "Qc";
+                            TTagc.value = Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_C"])) * datahub_data["ACTIVE_POWER_PHASE_C"];
+                            data.tagList.push(TTagc);
+
+                            let TTagCoshphi = new edgeSDK.EdgeDataTag();
+                            let average = TTaga.value != 0 && TTagb != 0 && TTagc != 0 ? 3 : 1;
+                            TTagCoshphi.deviceId = 'Device' + i;
+                            TTagCoshphi.tagName = "Coshphi";
+                            TTagCoshphi.value = (TTaga.value + TTagb.value + TTagc.value) / average;
+                            data.tagList.push(TTagCoshphi);
+
+                            console.log(average);
+                            console.log("KQ");
+                            console.log((TTaga.value + TTagb.value + TTagc.value) / average);
                         }
 
                         for (let i = 0; i < limit; i++) {
@@ -371,6 +403,26 @@ exports.sendDataAPIToDatahub = async (req, res) => {
                                 textTagConfig.description = param_config[property1] != null ? param_config[property1].Tagname : property1;
                                 textTagList.push(textTagConfig);
                             }
+
+                            let textTagConfiga = new edgeSDK.TextTagConfig();
+                            textTagConfiga.name = "Qa";
+                            textTagConfiga.description = "Qa";
+                            textTagList.push(textTagConfiga);
+
+                            let textTagConfigb = new edgeSDK.TextTagConfig();
+                            textTagConfigb.name = "Qb";
+                            textTagConfigb.description = "Qb";
+                            textTagList.push(textTagConfigb);
+
+                            let textTagConfigc = new edgeSDK.TextTagConfig();
+                            textTagConfigc.name = "Qc";
+                            textTagConfigc.description = "Qc";
+                            textTagList.push(textTagConfigc);
+
+                            let textTagConfigCoshphi = new edgeSDK.TextTagConfig();
+                            textTagConfigCoshphi.name = "Coshphi";
+                            textTagConfigCoshphi.description = "Coshphi";
+                            textTagList.push(textTagConfigCoshphi);
 
                             deviceConfig.textTagList = textTagList;
 
@@ -439,7 +491,7 @@ function sendDataInterval() {
                     let edgeConfig = new edgeSDK.EdgeConfig();
                     let textTagList = [];
 
-                    let limit = api_data.length;
+                    let limit = api_data.length ;
                     console.log(api_data.length);
                     //>= 10 ? 10 : api_data.length
                     for (let i = 0; i < limit; i++) {
@@ -456,6 +508,34 @@ function sendDataInterval() {
                             }
 
                         }
+
+                        let TTaga = new edgeSDK.EdgeDataTag();
+
+                        TTaga.deviceId = 'Device' + i;
+                        TTaga.tagName = "Qa";
+                        TTaga.value = Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_A"])) * datahub_data["ACTIVE_POWER_PHASE_A"];
+                        data.tagList.push(TTaga);
+
+                        let TTagb = new edgeSDK.EdgeDataTag();
+
+                        TTagb.deviceId = 'Device' + i;
+                        TTagb.tagName = "Qb";
+                        TTagb.value = Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_B"])) * datahub_data["ACTIVE_POWER_PHASE_B"];
+                        data.tagList.push(TTagb);
+
+                        let TTagc = new edgeSDK.EdgeDataTag();
+
+                        TTagc.deviceId = 'Device' + i;
+                        TTagc.tagName = "Qc";
+                        TTagc.value = Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_C"])) * datahub_data["ACTIVE_POWER_PHASE_C"];
+                        data.tagList.push(TTagc);
+
+                        let TTagCoshphi = new edgeSDK.EdgeDataTag();
+                        let average = TTaga.value != 0 && TTagb != 0 && TTagc != 0 ? 3 : 1;
+                        TTagCoshphi.deviceId = 'Device' + i;
+                        TTagCoshphi.tagName = "Coshphi";
+                        TTagCoshphi.value = (TTaga.value + TTagb.value + TTagc.value) / average;
+                        data.tagList.push(TTagCoshphi);
                     }
 
                     for (let i = 0; i < limit; i++) {
@@ -475,6 +555,30 @@ function sendDataInterval() {
                             textTagConfig.description = param_config[property1] != null ? param_config[property1].Tagname : property1;
                             textTagList.push(textTagConfig);
                         }
+
+                        let textTagConfiga = new edgeSDK.TextTagConfig();
+                        textTagConfiga.name = "Qa";
+                        textTagConfiga.description = "Qa";
+                        textTagList.push(textTagConfiga);
+
+                        let textTagConfigb = new edgeSDK.TextTagConfig();
+                        textTagConfigb.name = "Qb";
+                        textTagConfigb.description = "Qb";
+                        textTagList.push(textTagConfigb);
+
+                        let textTagConfigc = new edgeSDK.TextTagConfig();
+                        textTagConfigc.name = "Qc";
+                        textTagConfigc.description = "Qc";
+                        textTagList.push(textTagConfigc);
+
+                        let textTagConfigCoshphi = new edgeSDK.TextTagConfig();
+                        textTagConfigCoshphi.name = "Coshphi";
+                        textTagConfigCoshphi.description = "Coshphi";
+                        textTagList.push(textTagConfigCoshphi);
+
+                        deviceConfig.textTagList = textTagList;
+
+                        edgeConfig.node.deviceList.push(deviceConfig);
 
                         deviceConfig.textTagList = textTagList;
 
