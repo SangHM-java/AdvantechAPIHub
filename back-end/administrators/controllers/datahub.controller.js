@@ -356,9 +356,9 @@ exports.sendDataAPIToDatahub = async (req, res) => {
                             }
 
                             let TTaga = new edgeSDK.EdgeDataTag();
-                            let a = Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_A"])) * datahub_data["ACTIVE_POWER_PHASE_A"];
-                            let b = Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_B"])) * datahub_data["ACTIVE_POWER_PHASE_B"];
-                            let c =  Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_C"])) * datahub_data["ACTIVE_POWER_PHASE_C"]
+                            let a = Math.atanh(Math.acos(datahub_data["COSPHI_PHASE_A"])) * datahub_data["ACTIVE_POWER_PHASE_A"];
+                            let b = Math.atanh(Math.acos(datahub_data["COSPHI_PHASE_B"])) * datahub_data["ACTIVE_POWER_PHASE_B"];
+                            let c =  Math.atanh(Math.acos(datahub_data["COSPHI_PHASE_C"])) * datahub_data["ACTIVE_POWER_PHASE_C"]
 
                             TTaga.deviceId = 'Device' + i;
                             TTaga.tagName = "Qa";
@@ -521,9 +521,9 @@ function sendDataInterval() {
                         }
 
                         let TTaga = new edgeSDK.EdgeDataTag();
-                        let a = Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_A"])) * datahub_data["ACTIVE_POWER_PHASE_A"];
-                        let b = Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_B"])) * datahub_data["ACTIVE_POWER_PHASE_B"];
-                        let c =  Math.tan(Math.cosh(datahub_data["COSPHI_PHASE_C"])) * datahub_data["ACTIVE_POWER_PHASE_C"]
+                        let a = Math.atanh(Math.acos(datahub_data["COSPHI_PHASE_A"])) * datahub_data["ACTIVE_POWER_PHASE_A"];
+                        let b = Math.atanh(Math.acos(datahub_data["COSPHI_PHASE_B"])) * datahub_data["ACTIVE_POWER_PHASE_B"];
+                        let c =  Math.atanh(Math.acos(datahub_data["COSPHI_PHASE_C"])) * datahub_data["ACTIVE_POWER_PHASE_C"]
 
                         TTaga.deviceId = 'Device' + i;
                         TTaga.tagName = "Qa";
