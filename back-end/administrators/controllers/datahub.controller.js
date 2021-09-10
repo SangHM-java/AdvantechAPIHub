@@ -142,7 +142,7 @@ exports.getDataFromAPI = async (req, res) => {
 
                 let get_data_options = {
                     json: true,
-                    url: 'https://smart.cpc.vn/etl/api/getAllInfoMeter?' + TOKEN,
+                    url: 'https://smart.cpc.vn/etl/api/getAllInfoMeter?TOKEN=' + TOKEN,
                     method: 'GET',
                     headers: headers,
                     //body: dataString
@@ -218,10 +218,10 @@ exports.connectDatahub = async (req, res) => {
             });
 
         });
-        edgeAgent.events.on('disconnected', () => {
-            console.log('Disconnected... ');
+        // edgeAgent.events.on('disconnected', () => {
+        //     console.log('Disconnected... ');
 
-        });
+        // });
         edgeAgent.events.on('messageReceived', (msg) => {
             switch (msg.type) {
                 case edgeSDK.constant.messageType.writeValue:
@@ -252,12 +252,13 @@ exports.disconnectDatahub = async (req, res) => {
 
         if (edgeAgent != null) edgeAgent.disconnect();
         console.log('Disconnected... ');
-        edgeAgent.events.on('disconnected', () => {
-            console.log('Disconnected... ');
-            return res.status(200).send({ message: "disconnected" });
-        });
+        // edgeAgent.events.on('disconnected', () => {
+        //     console.log('Disconnected... ');
+            
+        // });
 
-        return res.status(200).send({ message: "error" });
+        return res.status(200).send({ message: "disconnected" });
+        //return res.status(200).send({ message: "error" });
 
 
     } catch (error) {
@@ -317,7 +318,7 @@ exports.sendDataAPIToDatahub = async (req, res) => {
 
                 let get_data_options = {
                     json: true,
-                    url: 'https://smart.cpc.vn/etl/api/getAllInfoMeter?' + TOKEN,
+                    url: 'https://smart.cpc.vn/etl/api/getAllInfoMeter?TOKEN=' + TOKEN,
                     method: 'GET',
                     headers: headers,
                     //body: dataString
@@ -332,8 +333,8 @@ exports.sendDataAPIToDatahub = async (req, res) => {
                         let edgeConfig = new edgeSDK.EdgeConfig();
                         let textTagList = [];
 
-
-                        for (let i = 0; i < api_data.length; i++) {
+                        let limit = api_data.length >= 10 ? 10 : api_data.length
+                        for (let i = 0; i < limit; i++) {
                             let datahub_data = api_data[i];
 
                             for (const property2 in datahub_data) {
@@ -349,7 +350,7 @@ exports.sendDataAPIToDatahub = async (req, res) => {
                             }
                         }
 
-                        for (let i = 0; i < api_data.length; i++) {
+                        for (let i = 0; i < limit; i++) {
                             let datahub_data = api_data[i];
 
                             let deviceConfig = new edgeSDK.DeviceConfig();

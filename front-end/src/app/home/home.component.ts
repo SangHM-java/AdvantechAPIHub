@@ -95,8 +95,8 @@ export class HomeComponent implements OnInit {
 
   disconnectDatahub() {
     this.dataService.disconnectDatahub().subscribe(data => {
-
-      this._snackBar.open("Disconnect success!");
+      this.connectedStatus = "lightgrey";
+      this._snackBar.open("Disconnect success!","OK");
     });
   }
 }
