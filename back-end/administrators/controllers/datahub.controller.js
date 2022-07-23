@@ -55,22 +55,22 @@ let rawdata = fs.readFileSync('datahub_config.json');
 let datahub_config_default = JSON.parse(rawdata);
 
 var options = {
-    connectType: edgeSDK.constant.connectType.DCCS,
-    DCCS: {
-        credentialKey: datahub_config_default.CredentialKey,
-        APIUrl: datahub_config_default.ApiUrl
-    },
-    // MQTT: {
-    //   hostName: '127.0.0.1',
-    //   port: 1883,
-    //   username: 'admin',
-    //   password: 'admin',
-    //   protocolType: edgeSDK.constant.protocol.TCP
+    connectType: edgeSDK.constant.connectType.MQTT,
+    // DCCS: {
+    //     credentialKey: datahub_config_default.CredentialKey,
+    //     APIUrl: datahub_config_default.ApiUrl
     // },
+    MQTT: {
+      hostName: 'rabbitmq-001-pub.hz.wise-paas.com.cn',
+      port: 1883,
+      username: 'Goy2waYPAGQP:PWyP8K5Jwoy7',
+      password: '6Kjv1mi7d2rISXU6yPxO',
+      protocolType: edgeSDK.constant.protocol.TCP
+    },
     useSecure: false,
     autoReconnect: true,
     reconnectInterval: 1000,
-    nodeId: datahub_config_default.NodeId, // getting from datahub portal
+    nodeId: 'scada_YtTJMC8MUlrm', // getting from datahub portal
     type: edgeSDK.constant.edgeType.Gateway, // Choice your edge is Gateway or Device, Default is Gateway
     // deviceId: 'Device1', // If type is Device, DeviceId must be filled
     heartbeat: 60000, // default is 60 seconds,
@@ -180,22 +180,22 @@ exports.connectDatahub = async (req, res) => {
         // writeJsonFile('datahub_config.json', {nodeId: datahub.NodeId,credentialKey:datahub.CredentialKey,apiUrl :datahub.ApiUrl});
         writeConfigFile(datahub);
         options = {
-            connectType: edgeSDK.constant.connectType.DCCS,
-            DCCS: {
-                credentialKey: datahub.CredentialKey,
-                APIUrl: datahub.ApiUrl
-            },
-            // MQTT: {
-            //   hostName: '127.0.0.1',
-            //   port: 1883,
-            //   username: 'admin',
-            //   password: 'admin',
-            //   protocolType: edgeSDK.constant.protocol.TCP
+            connectType: edgeSDK.constant.connectType.MQTT,
+            // DCCS: {
+            //     credentialKey: datahub.CredentialKey,
+            //     APIUrl: datahub.ApiUrl
             // },
+            MQTT: {
+              hostName: 'rabbitmq-001-pub.hz.wise-paas.com.cn',
+              port: 1883,
+              username: 'Goy2waYPAGQP:PWyP8K5Jwoy7',
+              password: '6Kjv1mi7d2rISXU6yPxO',
+              protocolType: edgeSDK.constant.protocol.TCP
+            },
             useSecure: false,
             autoReconnect: true,
             reconnectInterval: 1000,
-            nodeId: datahub.NodeId, // getting from datahub portal
+            nodeId: 'scada_YtTJMC8MUlrm', // getting from datahub portal
             type: edgeSDK.constant.edgeType.Gateway, // Choice your edge is Gateway or Device, Default is Gateway
             // deviceId: 'Device1', // If type is Device, DeviceId must be filled
             heartbeat: 60000, // default is 60 seconds,
@@ -214,8 +214,8 @@ exports.connectDatahub = async (req, res) => {
                 // when mqtt disconnect happened, and automatically reconnect
                 // clear interval to prevent duplicate time interval call
                 clearInterval(sendTimer);
-                sendTimer = setInterval(sendDataInterval, 60000);
-                //sendData();
+                sendTimer = setInterval(sendDataInterval, 3000);
+                sendData();
             }, error => {
                 console.log('upload config error');
                 console.log(error);
