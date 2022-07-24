@@ -12,6 +12,7 @@ const param_config = require('../../common/config/params.config');
 const http = require('http');
 const querystring = require('querystring');
 const edgeSDK = require('wisepaas-datahub-edge-nodejs-sdk');
+const parser = require('xml2json');
 var request = require('request');
 
 // GET parameters
@@ -54,34 +55,34 @@ const arrayTagSize = 10;
 let rawdata = fs.readFileSync('datahub_config.json');
 let datahub_config_default = JSON.parse(rawdata);
 
-var options = {
-    connectType: edgeSDK.constant.connectType.MQTT,
-    // DCCS: {
-    //     credentialKey: datahub_config_default.CredentialKey,
-    //     APIUrl: datahub_config_default.ApiUrl
-    // },
-    MQTT: {
-      hostName: 'rabbitmq-001-pub.hz.wise-paas.com.cn',
-      port: 1883,
-      username: 'Goy2waYPAGQP:PWyP8K5Jwoy7',
-      password: '6Kjv1mi7d2rISXU6yPxO',
-      protocolType: edgeSDK.constant.protocol.TCP
-    },
-    useSecure: false,
-    autoReconnect: true,
-    reconnectInterval: 1000,
-    nodeId: 'scada_YtTJMC8MUlrm', // getting from datahub portal
-    type: edgeSDK.constant.edgeType.Gateway, // Choice your edge is Gateway or Device, Default is Gateway
-    // deviceId: 'Device1', // If type is Device, DeviceId must be filled
-    heartbeat: 60000, // default is 60 seconds,
-    dataRecover: true, // need to recover data or not when disconnected
-    ovpnPath: '' // set the path of your .ovpn file, only for linux
-};
+// var options = {
+//     connectType: edgeSDK.constant.connectType.MQTT,
+//     // DCCS: {
+//     //     credentialKey: datahub_config_default.CredentialKey,
+//     //     APIUrl: datahub_config_default.ApiUrl
+//     // },
+//     MQTT: {
+//       hostName: 'rabbitmq-001-pub.hz.wise-paas.com.cn',
+//       port: 1883,
+//       username: 'Goy2waYPAGQP:PWyP8K5Jwoy7',
+//       password: '6Kjv1mi7d2rISXU6yPxO',
+//       protocolType: edgeSDK.constant.protocol.TCP
+//     },
+//     useSecure: false,
+//     autoReconnect: true,
+//     reconnectInterval: 1000,
+//     nodeId: 'scada_YtTJMC8MUlrm', // getting from datahub portal
+//     type: edgeSDK.constant.edgeType.Gateway, // Choice your edge is Gateway or Device, Default is Gateway
+//     // deviceId: 'Device1', // If type is Device, DeviceId must be filled
+//     heartbeat: 60000, // default is 60 seconds,
+//     dataRecover: true, // need to recover data or not when disconnected
+//     ovpnPath: '' // set the path of your .ovpn file, only for linux
+// };
+
 var sendTimer = {};
 var edgeConfig = {};
-var edgeAgent = new edgeSDK.EdgeAgent(options);
-
-var api_data = []
+//var edgeAgent = new edgeSDK.EdgeAgent(options);
+var api_data = [];
 
 function writeConfigFile(datahub) {
     //nodeId: datahub.NodeId,credentialKey:datahub.CredentialKey,apiUrl :datahub.ApiUrl
@@ -171,7 +172,18 @@ exports.getDataFromAPI = async (req, res) => {
     }
 
 };
-
+/*
+json req:
+{
+  "hostName":"rabbitmq-001-pub.hz.wise-paas.com.cn",
+  "port":1883,
+  "username":"Goy2waYPAGQP:PWyP8K5Jwoy7",
+  "password":"6Kjv1mi7d2rISXU6yPxO",
+  "protocolType":"TCP",
+  "nodeId":"scada_YtTJMC8MUlrm",
+  "scadaId":"scada_YtTJMC8MUlrm"
+}
+ */
 exports.connectDatahub = async (req, res) => {
     try {
         console.log("connect");
@@ -181,21 +193,18 @@ exports.connectDatahub = async (req, res) => {
         writeConfigFile(datahub);
         options = {
             connectType: edgeSDK.constant.connectType.MQTT,
-            // DCCS: {
-            //     credentialKey: datahub.CredentialKey,
-            //     APIUrl: datahub.ApiUrl
-            // },
             MQTT: {
-              hostName: 'rabbitmq-001-pub.hz.wise-paas.com.cn',
-              port: 1883,
-              username: 'Goy2waYPAGQP:PWyP8K5Jwoy7',
-              password: '6Kjv1mi7d2rISXU6yPxO',
+              hostName: datahub.hostName,
+              port: datahub.port,
+              username: datahub.username,
+              password: datahub.password,
               protocolType: edgeSDK.constant.protocol.TCP
             },
             useSecure: false,
             autoReconnect: true,
             reconnectInterval: 1000,
-            nodeId: 'scada_YtTJMC8MUlrm', // getting from datahub portal
+            nodeId: datahub.nodeId, // getting from datahub portal
+            scadaId: datahub.scadaId,
             type: edgeSDK.constant.edgeType.Gateway, // Choice your edge is Gateway or Device, Default is Gateway
             // deviceId: 'Device1', // If type is Device, DeviceId must be filled
             heartbeat: 60000, // default is 60 seconds,
@@ -620,7 +629,46 @@ function sendDataInterval() {
     });
 }
 
+var list_meter_parameters = [];
+var list_meter_config = {} ;
+function getObjKeys(obj, value) {
+    return Object.keys(obj).filter(key => obj[key] === value);
+  }
+/*
+{
+  "baseUrl":"http://14.225.244.63:8083/VendingInterface.asmx/SUNGRP_getInstant?",
+  "sNoList":"20698013,20697912",
+  "sTime":"2022-06-28 00:00:00"
+}
+*/
 
+exports.getMeterParameters = async (req, res) => {
+    try {
+        console.log("getMeterParameters");
+        let body = { ...{}, ...req.body };
+        let url = body.baseUrl + "sNoList="+ body.sNoList + "&" + "sTime=" + body.sTime;
+        console.log(url);
+        let get_token_options = {
+            json: true,
+            url: url,
+            method: 'GET',
+            headers: headers,
+        };
+    
+
+        request(get_token_options, (error, response, body) => {
+            data = parser.toJson(body, { object: true });
+            console.log(data);
+            list_meter_config = data["xs:schema"];
+            console.log(list_meter_config);
+            return res.status(200).send(list_meter_parameters);
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(400).send(error);
+    }
+
+};
 
 exports.insert = async (req, res) => {
     try {

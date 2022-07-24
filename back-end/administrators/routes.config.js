@@ -17,7 +17,9 @@ exports.routesConfig = function (app) {
     DatahubController.home
   ]);
 
-
+  app.get('/getMeterParameters', [
+    DatahubController.getMeterParameters
+  ])
   app.get('/sendDataAPIToDatahub', [
     DatahubController.sendDataAPIToDatahub
   ]);
