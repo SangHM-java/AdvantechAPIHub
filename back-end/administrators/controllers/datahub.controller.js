@@ -266,9 +266,10 @@ exports.getDailyData = async (req, res) => {
   }
 };
 
-exports.getMeterParameters = async (req, res) => {
+exports.getInstant = async (req, res) => {
   try {
     let body = { ...{}, ...req.body };
+    console.log(body);
     let url =
       body.baseUrl + "?sNoList=" + body.sNoList + "&" + "sTime=" + body.sTime;
     let get_token_options = {
@@ -287,6 +288,7 @@ exports.getMeterParameters = async (req, res) => {
             if (err) {
               return res.status(400).send(err);
             }
+            console.log(result);
             return res
               .status(200)
               .send(_.get(result, "DocumentElement.dtResult", []));

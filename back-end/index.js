@@ -11,7 +11,7 @@ const AdministratorRouter = require('./administrators/routes.config');
 const fs = require('fs');
 const path = require('path');
 const options = {
-    definition: {
+  definition: {
       openapi: "3.0.0",
       info: {
         title: "LogRocket Express API with Swagger",
@@ -34,7 +34,7 @@ const options = {
         },
       ],
     },
-    apis: ["back-end/administrators/routes.config.js"],
+    apis: ["./administrators/routes.config.js"],
   };
   
   const specs = swaggerJsdoc(options);
@@ -64,7 +64,7 @@ app.use(bodyParser.urlencoded({
 
 
 // AuthorizationRouter.routesConfig(app);
-AdministratorRouter.routesConfig(app);
+AdministratorRouter.setup(app);
 app.use(
     "",
     swaggerUi.serve,
