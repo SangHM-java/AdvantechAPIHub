@@ -1,10 +1,7 @@
-
-const DatahubController = require('./controllers/datahub.controller');
+const DatahubController = require("./controllers/datahub.controller");
 // const PermissionMiddleware = require('../common/middlewares/auth.permission.middleware');
 // const ValidationMiddleware = require('../common/middlewares/auth.validation.middleware');
-const config = require('../common/config/env.config');
-
-
+const config = require("../common/config/env.config");
 
 // const ADMIN = config.permissionLevels.ADMIN;
 // const PAID = config.permissionLevels.PAID_USER;
@@ -12,56 +9,47 @@ const config = require('../common/config/env.config');
 
 exports.routesConfig = function (app) {
   //Users apis
-  app.get('/', [
+  app.get("/", [
     // ValidationMiddleware.validJWTNeeded,
-    DatahubController.home
+    DatahubController.home,
   ]);
 
-  app.get('/getMeterParameters', [
-    DatahubController.getMeterParameters
-  ])
-  app.get('/sendDataAPIToDatahub', [
-    DatahubController.sendDataAPIToDatahub
-  ]);
+  app.get("/getMeterParameters", [DatahubController.getMeterParameters]);
+  app.get("/getDailyData", [DatahubController.getDailyData]);
+  app.get("/sendDataAPIToDatahub", [DatahubController.sendDataAPIToDatahub]);
 
-  app.get('/disconnectDatahub', [
-    DatahubController.disconnectDatahub
-  ]);
+  app.get("/disconnectDatahub", [DatahubController.disconnectDatahub]);
 
-  app.get('/getDataFromAPI', [
-    DatahubController.getDataFromAPI
-  ]);
+  app.get("/getDataFromAPI", [DatahubController.getDataFromAPI]);
 
   //datahub apis
-  app.get('/getConfigDatahub', [
+  app.get("/getConfigDatahub", [
     // ValidationMiddleware.validJWTNeeded,
-    DatahubController.getConfigDatahub
+    DatahubController.getConfigDatahub,
   ]);
   //datahub apis
-  app.get('/getTokenFromAPI', [
+  app.get("/getTokenFromAPI", [
     // ValidationMiddleware.validJWTNeeded,
-    DatahubController.getTokenFromAPI
+    DatahubController.getTokenFromAPI,
   ]);
-  app.post('/connectDatahub', [
-    // ValidationMiddleware.validJWTNeeded,
-    // PermissionMiddleware.minimumPermissionLevelRequired,
-    DatahubController.connectDatahub
-  ]);
-  app.put('/datahub/:id', [
+  app.post("/connectDatahub", [
     // ValidationMiddleware.validJWTNeeded,
     // PermissionMiddleware.minimumPermissionLevelRequired,
-    DatahubController.update
+    DatahubController.connectDatahub,
   ]);
-  app.get('/datahub/:id', [
+  app.put("/datahub/:id", [
     // ValidationMiddleware.validJWTNeeded,
     // PermissionMiddleware.minimumPermissionLevelRequired,
-    DatahubController.getById
+    DatahubController.update,
   ]);
-  app.delete('/datahub/:id', [
+  app.get("/datahub/:id", [
     // ValidationMiddleware.validJWTNeeded,
     // PermissionMiddleware.minimumPermissionLevelRequired,
-    DatahubController.removeById
+    DatahubController.getById,
   ]);
-
-  
+  app.delete("/datahub/:id", [
+    // ValidationMiddleware.validJWTNeeded,
+    // PermissionMiddleware.minimumPermissionLevelRequired,
+    DatahubController.removeById,
+  ]);
 };
