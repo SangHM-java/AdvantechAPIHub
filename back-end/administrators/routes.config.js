@@ -28,9 +28,9 @@ exports.routesConfig = function (app) {
     DatahubController.disconnectDatahub
   ]);
 
-  app.get('/getDataFromAPI', [
-    DatahubController.getDataFromAPI
-  ]);
+  // app.get('/getDataFromAPI', [
+  //   DatahubController.getDataFromAPI
+  // ]);
 
   //datahub apis
   app.get('/getConfigDatahub', [

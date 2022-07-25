@@ -14,6 +14,8 @@ const querystring = require('querystring');
 const edgeSDK = require('wisepaas-datahub-edge-nodejs-sdk');
 const parser = require('xml2json');
 var request = require('request');
+const internal = require('stream');
+const { Interface } = require('readline');
 
 // GET parameters
 const parameters = {
@@ -47,66 +49,38 @@ const headers = {
 
 const deviceCount = 1;
 const analogTagNum = 3;
-const discreteTagNum = 3;
 const textTagNum = 3;
-const arrayTagNum = 3;
-const arrayTagSize = 10;
+// const arrayTagNum = 3;
+// const arrayTagSize = 10;
+// const discreteTagNum = 3;
 
 let rawdata = fs.readFileSync('datahub_config.json');
 let datahub_config_default = JSON.parse(rawdata);
 
-// var options = {
-//     connectType: edgeSDK.constant.connectType.MQTT,
-//     // DCCS: {
-//     //     credentialKey: datahub_config_default.CredentialKey,
-//     //     APIUrl: datahub_config_default.ApiUrl
-//     // },
-//     MQTT: {
-//       hostName: 'rabbitmq-001-pub.hz.wise-paas.com.cn',
-//       port: 1883,
-//       username: 'Goy2waYPAGQP:PWyP8K5Jwoy7',
-//       password: '6Kjv1mi7d2rISXU6yPxO',
-//       protocolType: edgeSDK.constant.protocol.TCP
-//     },
-//     useSecure: false,
-//     autoReconnect: true,
-//     reconnectInterval: 1000,
-//     nodeId: 'scada_YtTJMC8MUlrm', // getting from datahub portal
-//     type: edgeSDK.constant.edgeType.Gateway, // Choice your edge is Gateway or Device, Default is Gateway
-//     // deviceId: 'Device1', // If type is Device, DeviceId must be filled
-//     heartbeat: 60000, // default is 60 seconds,
-//     dataRecover: true, // need to recover data or not when disconnected
-//     ovpnPath: '' // set the path of your .ovpn file, only for linux
-// };
-
+let options = {
+    connectType: edgeSDK.constant.connectType.MQTT,
+    MQTT: {
+        hostName: "rabbitmq-001-pub.hz.wise-paas.com.cn",
+        port: 1883,
+        username: "Goy2waYPAGQP:jPy9GbpKRVeY",
+        password: "A3nkFKlj3Iu0MVn3vdZR",
+        protocolType: edgeSDK.constant.protocol.TCP
+    },
+    useSecure: false,
+    autoReconnect: true,
+    reconnectInterval: 1000,
+    nodeId: "scada_sGrDhJvhEKv9", // getting from datahub portal
+    scadaId: "scada_sGrDhJvhEKv9",
+    type: edgeSDK.constant.edgeType.Gateway, // Choice your edge is Gateway or Device, Default is Gateway
+    // deviceId: 'Device1', // If type is Device, DeviceId must be filled
+    heartbeat: 60000, // default is 60 seconds,
+    dataRecover: true, // need to recover data or not when disconnected
+    ovpnPath: '' // set the path of your .ovpn file, only for linux
+};
 var sendTimer = {};
 var edgeConfig = {};
-//var edgeAgent = new edgeSDK.EdgeAgent(options);
+var edgeAgent = new edgeSDK.EdgeAgent(options);
 var api_data = [];
-
-function writeConfigFile(datahub) {
-    //nodeId: datahub.NodeId,credentialKey:datahub.CredentialKey,apiUrl :datahub.ApiUrl
-    // json data
-    // var jsonData = '{"config":{"nodeId":"' + datahub.NodeId +'","credentialKey":"' + datahub.CredentialKey+ '",apiUrl:"'+ datahub.ApiUrl + '"}}';
-
-    // parse json
-    // var jsonObj = JSON.parse(jsonData);
-    //console.log(jsonObj);
-
-    // stringify JSON Object
-    var jsonContent = JSON.stringify(datahub);
-    console.log(jsonContent);
-
-    fs.writeFile("datahub_config.json", jsonContent, 'utf8', function (err) {
-        if (err) {
-            console.log("An error occured while writing JSON Object to File.");
-            return console.log(err);
-        }
-
-        console.log("JSON file has been saved.");
-    });
-
-}
 
 exports.getConfigDatahub = async (req, res) => {
     try {
@@ -124,54 +98,6 @@ exports.getConfigDatahub = async (req, res) => {
 
 };
 
-exports.getDataFromAPI = async (req, res) => {
-
-    try {
-
-        let get_token_options = {
-            json: true,
-            url: 'http://smart.cpc.vn/etl/api/login?USER_NAME=chaunm&PASSWORD=chaunm123',
-            method: 'GET',
-            headers: headers,
-            //body: dataString
-        };
-        let TOKEN = "";
-
-        request(get_token_options, (error, response, body) => {
-            if (!error && response.statusCode == 200) {
-
-                TOKEN = body.data.TOKEN;
-                //res.status(200).send({TOKEN : body.data.data.TOKEN});
-                // const get_request_args = querystring.stringify(parameters);
-                let get_request_args = "MA_DIEMDO=S1.01_AN&TU_NGAY=8/22/2021 6:41:12&DEN_NGAY=8/24/2021 6:41:12&TOKEN=" + TOKEN;
-
-                let get_data_options = {
-                    json: true,
-                    url: 'https://smart.cpc.vn/etl/api/getAllInfoMeter?TOKEN=' + TOKEN,
-                    method: 'GET',
-                    headers: headers,
-                    //body: dataString
-                };
-
-
-                request(get_data_options, (error, response, body) => {
-                    if (!error && response.statusCode == 200) {
-                        api_data = body.data;
-                        res.status(200).send({ data: body });
-                    }
-                });
-            }
-        });
-
-
-
-
-    } catch (error) {
-        console.log(error);
-        res.status(400).send({ message: "Datahub not exists" });
-    }
-
-};
 /*
 json req:
 {
@@ -194,11 +120,11 @@ exports.connectDatahub = async (req, res) => {
         options = {
             connectType: edgeSDK.constant.connectType.MQTT,
             MQTT: {
-              hostName: datahub.hostName,
-              port: datahub.port,
-              username: datahub.username,
-              password: datahub.password,
-              protocolType: edgeSDK.constant.protocol.TCP
+                hostName: datahub.hostName,
+                port: datahub.port,
+                username: datahub.username,
+                password: datahub.password,
+                protocolType: edgeSDK.constant.protocol.TCP
             },
             useSecure: false,
             autoReconnect: true,
@@ -219,11 +145,16 @@ exports.connectDatahub = async (req, res) => {
         edgeAgent.events.on('connected', () => {
             console.log('Connect success !');
             edgeConfig = prepareConfig();
+            console.log(edgeConfig);
+            console.log(edgeConfig.Scada.TextTagList);
+            console.log(edgeConfig.Scada.AnalogTagList);
+
             edgeAgent.uploadConfig(edgeSDK.constant.actionType.create, edgeConfig).then((res) => {
                 // when mqtt disconnect happened, and automatically reconnect
                 // clear interval to prevent duplicate time interval call
+                console.log(res);
                 clearInterval(sendTimer);
-                sendTimer = setInterval(sendDataInterval, 3000);
+                sendTimer = setInterval(sendData, 3000);
                 sendData();
             }, error => {
                 console.log('upload config error');
@@ -231,10 +162,10 @@ exports.connectDatahub = async (req, res) => {
             });
 
         });
-        // edgeAgent.events.on('disconnected', () => {
-        //     console.log('Disconnected... ');
+        edgeAgent.events.on('disconnected', () => {
+            console.log('Disconnected... ');
 
-        // });
+        });
         edgeAgent.events.on('messageReceived', (msg) => {
             switch (msg.type) {
                 case edgeSDK.constant.messageType.writeValue:
@@ -346,7 +277,7 @@ exports.sendDataAPIToDatahub = async (req, res) => {
                         let edgeConfig = new edgeSDK.EdgeConfig();
                         let textTagList = [];
 
-                        let limit = api_data.length ;
+                        let limit = api_data.length;
                         console.log(api_data.length);
                         //>= 10 ? 10 : api_data.length
                         for (let i = 0; i < limit; i++) {
@@ -354,7 +285,7 @@ exports.sendDataAPIToDatahub = async (req, res) => {
 
                             for (const property2 in datahub_data) {
                                 if (datahub_data[property2] != null && datahub_data[property2] != "null") {
-                                    let TTag = new edgeSDK.EdgeDataTag();
+                                    let TTag = new edgeSDK.Tag();
 
                                     TTag.deviceId = 'Device' + i;
                                     TTag.tagName = param_config[property2] != null ? param_config[property2].Tagname : property2;
@@ -364,37 +295,37 @@ exports.sendDataAPIToDatahub = async (req, res) => {
 
                             }
 
-                            let TTaga = new edgeSDK.EdgeDataTag();
+                            let TTaga = new edgeSDK.Tag();
                             let a = Math.atanh(Math.acos(datahub_data["COSPHI_PHASE_A"])) * datahub_data["ACTIVE_POWER_PHASE_A"];
                             let b = Math.atanh(Math.acos(datahub_data["COSPHI_PHASE_B"])) * datahub_data["ACTIVE_POWER_PHASE_B"];
-                            let c =  Math.atanh(Math.acos(datahub_data["COSPHI_PHASE_C"])) * datahub_data["ACTIVE_POWER_PHASE_C"]
+                            let c = Math.atanh(Math.acos(datahub_data["COSPHI_PHASE_C"])) * datahub_data["ACTIVE_POWER_PHASE_C"]
 
                             TTaga.deviceId = 'Device' + i;
                             TTaga.tagName = "Qa";
-                            TTaga.value = a ;
+                            TTaga.value = a;
                             data.tagList.push(TTaga);
 
-                            let TTagb = new edgeSDK.EdgeDataTag();
+                            let TTagb = new edgeSDK.Tag();
 
                             TTagb.deviceId = 'Device' + i;
                             TTagb.tagName = "Qb";
                             TTagb.value = b;
                             data.tagList.push(TTagb);
 
-                            let TTagc = new edgeSDK.EdgeDataTag();
+                            let TTagc = new edgeSDK.Tag();
 
                             TTagc.deviceId = 'Device' + i;
                             TTagc.tagName = "Qc";
-                            TTagc.value =c;
+                            TTagc.value = c;
                             data.tagList.push(TTagc);
 
-                            let TTagCoshphi = new edgeSDK.EdgeDataTag();
+                            let TTagCoshphi = new edgeSDK.Tag();
                             let average = datahub_data["COSPCHI_PHASE_A"] != 0
-                             && datahub_data["COSPHI_PHASE_B"] != 0 
-                             && datahub_data["COSPHI_PHASE_C"] != 0 
-                             && datahub_data["COSPHI_PHASE_A"] != null 
-                             && datahub_data["COSPHI_PHASE_B"] != null 
-                             && datahub_data["COSPHI_PHASE_C"] != null ? 3 : 1;
+                                && datahub_data["COSPHI_PHASE_B"] != 0
+                                && datahub_data["COSPHI_PHASE_C"] != 0
+                                && datahub_data["COSPHI_PHASE_A"] != null
+                                && datahub_data["COSPHI_PHASE_B"] != null
+                                && datahub_data["COSPHI_PHASE_C"] != null ? 3 : 1;
                             TTagCoshphi.deviceId = 'Device' + i;
                             TTagCoshphi.tagName = "Coshphi";
                             TTagCoshphi.value = (datahub_data["COSPHI_PHASE_A"] + datahub_data["COSPHI_PHASE_B"] + datahub_data["COSPHI_PHASE_C"]) / average;
@@ -404,23 +335,23 @@ exports.sendDataAPIToDatahub = async (req, res) => {
                             console.log("KQ");
                             console.log(datahub_data["COSPHI_PHASE_A"]);
                             console.log(Math.cosh(datahub_data["COSPHI_PHASE_A"]));
-                            console.log(a,b,c);
+                            console.log(a, b, c);
                             console.log((a + b + c) / average);
                         }
 
                         for (let i = 0; i < limit; i++) {
                             let datahub_data = api_data[i];
 
-                            let deviceConfig = new edgeSDK.DeviceConfig();
-                            deviceConfig.id = 'Device' + i;
-                            deviceConfig.name = datahub_data["MA_DIEMDO"];
-                            deviceConfig.type = 'Smart Device';
-                            deviceConfig.description = datahub_data["MA_DIEMDO"];
+                            let ScadaConfig = new edgeSDK.ScadaConfig();
+                            ScadaConfig.id = 'Device' + i;
+                            ScadaConfig.name = datahub_data["MA_DIEMDO"];
+                            ScadaConfig.type = 'Smart Device';
+                            ScadaConfig.description = datahub_data["MA_DIEMDO"];
 
                             for (const property1 in datahub_data) {
                                 let textTagConfig = new edgeSDK.TextTagConfig();
-                                textTagConfig.name = param_config[property1] != null ? param_config[property1].Tagname : property1;
-                                textTagConfig.description = param_config[property1] != null ? param_config[property1].Tagname : property1;
+                                textTagConfig.Name = param_config[property1] != null ? param_config[property1].Tagname : property1;
+                                textTagConfig.Description = param_config[property1] != null ? param_config[property1].Tagname : property1;
                                 textTagList.push(textTagConfig);
                             }
 
@@ -444,15 +375,15 @@ exports.sendDataAPIToDatahub = async (req, res) => {
                             textTagConfigCoshphi.description = "Coshphi";
                             textTagList.push(textTagConfigCoshphi);
 
-                            deviceConfig.textTagList = textTagList;
+                            ScadaConfig.textTagList = textTagList;
 
-                            edgeConfig.node.deviceList.push(deviceConfig);
+                            edgeConfig.node.deviceList.push(ScadaConfig);
                         }
 
                         edgeAgent.uploadConfig(edgeSDK.constant.actionType.create, edgeConfig).then((res2) => {
-                            edgeAgent.sendData(data);
-                            console.log(res2);
-                            res.status(200).send({ message: res2, deviceList: edgeConfig.node.deviceList });
+                        edgeAgent.sendData(data);
+                        console.log(res2);
+                        res.status(200).send({ message: res2, deviceList: edgeConfig.node.deviceList });
                         }, error => {
                             console.log('upload config error');
                             console.log(error);
@@ -476,164 +407,11 @@ exports.sendDataAPIToDatahub = async (req, res) => {
 
 };
 
-function sendDataInterval() {
-    console.log("sendDataAPIToDatahub 30s interval");
-    let get_token_options = {
-        json: true,
-        url: 'http://smart.cpc.vn/etl/api/login?USER_NAME=chaunm&PASSWORD=chaunm123',
-        method: 'GET',
-        headers: headers,
-        //body: dataString
-    };
-    let TOKEN = "";
-
-    request(get_token_options, (error, response, body) => {
-        if (!error && response.statusCode == 200) {
-            TOKEN = body.data.TOKEN;
-            //res.status(200).send({TOKEN : body.data.data.TOKEN});
-            // const get_request_args = querystring.stringify(parameters);
-            let get_request_args = "MA_DIEMDO=S1.01_AN&TU_NGAY=8/22/2021 6:41:12&DEN_NGAY=8/24/2021 6:41:12&TOKEN=" + TOKEN;
-
-            let get_data_options = {
-                json: true,
-                url: 'https://smart.cpc.vn/etl/api/getAllInfoMeter?TOKEN=' + TOKEN,
-                method: 'GET',
-                headers: headers,
-                //body: dataString
-            };
-
-
-            request(get_data_options, (error, response, body) => {
-                if (!error && response.statusCode == 200) {
-                    api_data = body.data;
-                    let data = new edgeSDK.EdgeData();
-                    //let datahub_data = api_data[0];
-                    let edgeConfig = new edgeSDK.EdgeConfig();
-                    let textTagList = [];
-
-                    let limit = api_data.length ;
-                    console.log(api_data.length);
-                    //>= 10 ? 10 : api_data.length
-                    for (let i = 0; i < limit; i++) {
-                        let datahub_data = api_data[i];
-
-                        for (const property2 in datahub_data) {
-                            if (datahub_data[property2] != null && datahub_data[property2] != "null") {
-                                let TTag = new edgeSDK.EdgeDataTag();
-
-                                TTag.deviceId = 'Device' + i;
-                                TTag.tagName = param_config[property2] != null ? param_config[property2].Tagname : property2;
-                                TTag.value = "" + datahub_data[property2];
-                                data.tagList.push(TTag);
-                            }
-
-                        }
-
-                        let TTaga = new edgeSDK.EdgeDataTag();
-                        let a = Math.atanh(Math.acos(datahub_data["COSPHI_PHASE_A"])) * datahub_data["ACTIVE_POWER_PHASE_A"];
-                        let b = Math.atanh(Math.acos(datahub_data["COSPHI_PHASE_B"])) * datahub_data["ACTIVE_POWER_PHASE_B"];
-                        let c =  Math.atanh(Math.acos(datahub_data["COSPHI_PHASE_C"])) * datahub_data["ACTIVE_POWER_PHASE_C"]
-
-                        TTaga.deviceId = 'Device' + i;
-                        TTaga.tagName = "Qa";
-                        TTaga.value = a ;
-                        data.tagList.push(TTaga);
-
-                        let TTagb = new edgeSDK.EdgeDataTag();
-
-                        TTagb.deviceId = 'Device' + i;
-                        TTagb.tagName = "Qb";
-                        TTagb.value = b;
-                        data.tagList.push(TTagb);
-
-                        let TTagc = new edgeSDK.EdgeDataTag();
-
-                        TTagc.deviceId = 'Device' + i;
-                        TTagc.tagName = "Qc";
-                        TTagc.value =c;
-                        data.tagList.push(TTagc);
-
-                        let TTagCoshphi = new edgeSDK.EdgeDataTag();
-                        let average = datahub_data["COSPCHI_PHASE_A"] != 0
-                         && datahub_data["COSPHI_PHASE_B"] != 0 
-                         && datahub_data["COSPHI_PHASE_C"] != 0 
-                         && datahub_data["COSPHI_PHASE_A"] != null 
-                         && datahub_data["COSPHI_PHASE_B"] != null 
-                         && datahub_data["COSPHI_PHASE_C"] != null ? 3 : 1;
-                        TTagCoshphi.deviceId = 'Device' + i;
-                        TTagCoshphi.tagName = "Coshphi";
-                        TTagCoshphi.value = (datahub_data["COSPHI_PHASE_A"] + datahub_data["COSPHI_PHASE_B"] + datahub_data["COSPHI_PHASE_C"]) / average;
-                        data.tagList.push(TTagCoshphi);
-                    }
-
-                    for (let i = 0; i < limit; i++) {
-                        let datahub_data = api_data[i];
-
-                        let deviceConfig = new edgeSDK.DeviceConfig();
-                        deviceConfig.id = 'Device' + i;
-                        deviceConfig.name = datahub_data["MA_DIEMDO"];
-                        deviceConfig.type = 'Smart Device';
-                        deviceConfig.description = datahub_data["MA_DIEMDO"];
-
-                        for (const property1 in datahub_data) {
-                            let textTagConfig = new edgeSDK.TextTagConfig();
-                            // textTagConfig.name = property1;
-                            // textTagConfig.description = '' + datahub_data[property1];
-                            textTagConfig.name = param_config[property1] != null ? param_config[property1].Tagname : property1;
-                            textTagConfig.description = param_config[property1] != null ? param_config[property1].Tagname : property1;
-                            textTagList.push(textTagConfig);
-                        }
-
-                        let textTagConfiga = new edgeSDK.TextTagConfig();
-                        textTagConfiga.name = "Qa";
-                        textTagConfiga.description = "Qa";
-                        textTagList.push(textTagConfiga);
-
-                        let textTagConfigb = new edgeSDK.TextTagConfig();
-                        textTagConfigb.name = "Qb";
-                        textTagConfigb.description = "Qb";
-                        textTagList.push(textTagConfigb);
-
-                        let textTagConfigc = new edgeSDK.TextTagConfig();
-                        textTagConfigc.name = "Qc";
-                        textTagConfigc.description = "Qc";
-                        textTagList.push(textTagConfigc);
-
-                        let textTagConfigCoshphi = new edgeSDK.TextTagConfig();
-                        textTagConfigCoshphi.name = "Coshphi";
-                        textTagConfigCoshphi.description = "Coshphi";
-                        textTagList.push(textTagConfigCoshphi);
-
-                        deviceConfig.textTagList = textTagList;
-
-                        edgeConfig.node.deviceList.push(deviceConfig);
-
-                        deviceConfig.textTagList = textTagList;
-
-                        edgeConfig.node.deviceList.push(deviceConfig);
-                    }
-
-                    edgeAgent.uploadConfig(edgeSDK.constant.actionType.create, edgeConfig).then((res2) => {
-                        edgeAgent.sendData(data);
-                        console.log(res2);
-                    }, error => {
-                        console.log('upload config error');
-                        console.log(error);
-                    });
-
-
-
-                }
-            });
-        }
-    });
-}
-
 var list_meter_parameters = [];
-var list_meter_config = {} ;
+var list_meter_config = {};
 function getObjKeys(obj, value) {
     return Object.keys(obj).filter(key => obj[key] === value);
-  }
+}
 /*
 {
   "baseUrl":"http://14.225.244.63:8083/VendingInterface.asmx/SUNGRP_getInstant?",
@@ -646,7 +424,7 @@ exports.getMeterParameters = async (req, res) => {
     try {
         console.log("getMeterParameters");
         let body = { ...{}, ...req.body };
-        let url = body.baseUrl + "sNoList="+ body.sNoList + "&" + "sTime=" + body.sTime;
+        let url = body.baseUrl + "sNoList=" + body.sNoList + "&" + "sTime=" + body.sTime;
         console.log(url);
         let get_token_options = {
             json: true,
@@ -654,7 +432,7 @@ exports.getMeterParameters = async (req, res) => {
             method: 'GET',
             headers: headers,
         };
-    
+
 
         request(get_token_options, (error, response, body) => {
             data = parser.toJson(body, { object: true });
@@ -719,9 +497,6 @@ exports.getById = async (req, res) => {
 
 };
 
-
-
-
 exports.removeById = (req, res) => {
     console.log("insert");
 };
@@ -730,47 +505,60 @@ exports.removeById = (req, res) => {
 
 function prepareConfig() {
     let edgeConfig = new edgeSDK.EdgeConfig();
+    let tagList = [
+        { name: "MA_DIEMDO", type: "string" },
+        { name: "SO_CTO", type: "string" },
+        { name: "IMPORT_KWH", type: "decimal" },
+        { name: "EXPORT_KWH", type: "decimal" },
+        { name: "IMPORT_VAR", type: "decimal" },
+        { name: "EXPORT_VAR", type: "decimal" },
+        { name: "Ia", type: "decimal" },
+        { name: "Ib", type: "decimal" },
+        { name: "Ic", type: "decimal" },
+        { name: "Ua", type: "decimal" },
+        { name: "Ub", type: "decimal" },
+        { name: "Uc", type: "decimal" },
+        { name: "Cosphi", type: "decimal" },
+        { name: "NGAYGIO", type: "string" }
+    ]
     let analogTagList = [];
-    let discreteTagList = [];
     let textTagList = [];
 
-    for (let i = 1; i <= deviceCount; i++) {
-        let deviceConfig = new edgeSDK.DeviceConfig();
-        deviceConfig.id = 'Device' + i;
-        deviceConfig.name = 'Device' + i;
-        deviceConfig.type = 'Smart Device';
-        deviceConfig.description = 'Device ' + i;
-        for (let j = 1; j <= analogTagNum; j++) {
+    edgeConfig.Scada = new edgeSDK.ScadaConfig();
+    // {
+    //     Id = options.nodeId;
+    //     Name = options.nodeId;
+    //     Description = "descrp";
+    //     PortNumber = 1;
+    //     HeartBeat = 60;
+    //     BackupDeviceId =0;
+    // };
+    edgeConfig.Scada.Id = options.nodeId;
+    edgeConfig.Scada.Name = options.nodeId;
+    edgeConfig.Scada.Description = "descrp";
+    edgeConfig.Scada.PortNumber = 1;
+    edgeConfig.Scada.DeviceType = 0;
+    edgeConfig.Scada.HeartBeat = 60;
+    edgeConfig.Scada.BackupDeviceId =0;
+
+    for (let i = 0; i < tagList.length; i++) {
+        if (tagList[i].type == "string") {
+            let textTagConfig = new edgeSDK.TextTagConfig();
+            textTagConfig.Name = tagList[i].name;
+            textTagConfig.Description = tagList[i].name;
+            textTagList.push(textTagConfig);
+        } else {
             let analogTagConfig = new edgeSDK.AnalogTagConfig();
-            analogTagConfig.name = 'ATag' + j;
-            analogTagConfig.description = 'ATag' + j;
+            analogTagConfig.Name = tagList[i].name;
+            analogTagConfig.Description = tagList[i].name;
             analogTagList.push(analogTagConfig);
         }
-        for (let j = 1; j <= discreteTagNum; j++) {
-            let discreteTagConfig = new edgeSDK.DiscreteTagConfig();
-            discreteTagConfig.name = 'hominhsang' + j;
-            discreteTagConfig.description = 'DTag' + j;
-            discreteTagList.push(discreteTagConfig);
-        }
-        for (let j = 1; j <= textTagNum; j++) {
-            let textTagConfig = new edgeSDK.TextTagConfig();
-            textTagConfig.name = 'TTag' + j;
-            textTagConfig.description = 'TTag' + j;
-            textTagList.push(textTagConfig);
-        }
-        for (let j = 1; j <= arrayTagNum; j++) {
-            let arrayTag = new edgeSDK.AnalogTagConfig();
-            arrayTag.name = 'ArrayTag' + j;
-            arrayTag.description = 'ArrayTag' + j;
-            arrayTag.arraySize = 10;
-            analogTagList.push(arrayTag);
-        }
-        deviceConfig.analogTagList = analogTagList;
-        deviceConfig.discreteTagList = discreteTagList;
-        deviceConfig.textTagList = textTagList;
-
-        edgeConfig.node.deviceList.push(deviceConfig);
     }
+    
+    edgeConfig.Scada.AnalogTagList = analogTagList;
+    edgeConfig.Scada.TextTagList = textTagList;
+
+    //edgeConfig.node.deviceList.push(edgeConfig.Scada);
 
     return edgeConfig;
 }
@@ -779,48 +567,72 @@ function sendData() {
         return;
     }
     let data = prepareData();
-    console.log(data);
+    //console.log(data);
     edgeAgent.sendData(data);
 }
 function prepareData() {
     let data = new edgeSDK.EdgeData();
-    for (let i = 1; i <= deviceCount; i++) {
-        for (let j = 1; j <= analogTagNum; j++) {
-            let ATag = new edgeSDK.EdgeDataTag();
-            ATag.deviceId = 'Device' + i;
-            ATag.tagName = 'hominhsang' + j;
-            ATag.value = Math.floor(Math.random() * 100) + 1;
-            data.tagList.push(ATag);
+    let tagList = [
+        { name: "MA_DIEMDO", type: "string" },
+        { name: "SO_CTO", type: "string" },
+        { name: "IMPORT_KWH", type: "decimal" },
+        { name: "EXPORT_KWH", type: "decimal" },
+        { name: "IMPORT_VAR", type: "decimal" },
+        { name: "EXPORT_VAR", type: "decimal" },
+        { name: "Ia", type: "decimal" },
+        { name: "Ib", type: "decimal" },
+        { name: "Ic", type: "decimal" },
+        { name: "Ua", type: "decimal" },
+        { name: "Ub", type: "decimal" },
+        { name: "Uc", type: "decimal" },
+        { name: "Cosphi", type: "decimal" },
+        { name: "NGAYGIO", type: "string" }
+    ]
+    for (let i = 0; i < tagList.length; i++) {
+        if(tagList[i].type == "string"){
+            let TTag = new edgeSDK.Tag();
+            TTag.DeviceId = options.nodeId;
+            TTag.TagName = tagList[i].name;
+            TTag.Value = '20698013';
+            data.TagList.push(TTag);
+        }else{
+            let ATag = new edgeSDK.Tag();
+            ATag.DeviceId = options.nodeId;
+            ATag.TagName = tagList[i].name;
+            ATag.Value = {
+                "0": Math.floor(Math.random() * 100) + 1,
+                "1": Math.floor(Math.random() * 100) + 1
+            };
+            data.TagList.push(ATag);
         }
-        for (let j = 1; j <= discreteTagNum; j++) {
-            let DTag = new edgeSDK.EdgeDataTag();
-            DTag.deviceId = 'Device' + i;
-            DTag.tagName = 'DTag' + j;
-            DTag.value = j % 2;
-            data.tagList.push(DTag);
-        }
-        for (let j = 1; j <= textTagNum; j++) {
-            let TTag = new edgeSDK.EdgeDataTag();
-            TTag.deviceId = 'Device' + i;
-            TTag.tagName = 'TTag' + j;
-            TTag.value = 'TEST' + j.toString();
-            data.tagList.push(TTag);
-        }
-        for (let j = 1; j <= arrayTagNum; j++) {
-            let dic = {};
-            for (let k = 0; k < arrayTagSize; k++) {
-                dic[k.toString()] = Math.floor(Math.random() * 100) + 1;
-            }
-            let AryTag = new edgeSDK.EdgeDataTag();
-            AryTag.deviceId = 'Device' + i;
-            AryTag.tagName = 'ArrayTag' + j;
-            AryTag.value = dic;
-            data.tagList.push(AryTag);
-        }
-        data.ts = Date.now();
     }
-
+    
+    //console.log(data);
     return data;
+}
+
+function writeConfigFile(datahub) {
+    //nodeId: datahub.NodeId,credentialKey:datahub.CredentialKey,apiUrl :datahub.ApiUrl
+    // json data
+    // var jsonData = '{"config":{"nodeId":"' + datahub.NodeId +'","credentialKey":"' + datahub.CredentialKey+ '",apiUrl:"'+ datahub.ApiUrl + '"}}';
+
+    // parse json
+    // var jsonObj = JSON.parse(jsonData);
+    //console.log(jsonObj);
+
+    // stringify JSON Object
+    var jsonContent = JSON.stringify(datahub);
+    console.log(jsonContent);
+
+    fs.writeFile("datahub_config.json", jsonContent, 'utf8', function (err) {
+        if (err) {
+            console.log("An error occured while writing JSON Object to File.");
+            return console.log(err);
+        }
+
+        console.log("JSON file has been saved.");
+    });
+
 }
 function updateDeviceStatus(numDeviceCount) {
     let devieStatus = new edgeSDK.EdgeDeviceStatus();
@@ -833,12 +645,12 @@ function updateDeviceStatus(numDeviceCount) {
     edgeAgent.sendDeviceStatus(devieStatus);
 }
 
-function deleteDeviceConfig() {
+function deleteScadaConfig() {
     let edgeConfig = new edgeSDK.EdgeConfig();
     for (let i = 1; i <= deviceCount; i++) {
-        let deviceConfig = new edgeSDK.DeviceConfig();
-        deviceConfig.id = 'Device' + i;
-        edgeConfig.node.deviceList.push(deviceConfig);
+        let ScadaConfig = new edgeSDK.ScadaConfig();
+        ScadaConfig.id = 'Device' + i;
+        edgeConfig.node.deviceList.push(ScadaConfig);
     }
     return edgeConfig;
 }
@@ -850,11 +662,11 @@ function deleteTagConfig() {
     let textTagList = [];
 
     for (let i = 1; i <= deviceCount; i++) {
-        let deviceConfig = new edgeSDK.DeviceConfig();
-        deviceConfig.id = 'Device' + i;
-        deviceConfig.name = 'Device ' + i;
-        deviceConfig.type = 'Smart Device';
-        deviceConfig.description = 'Device ' + i;
+        let ScadaConfig = new edgeSDK.ScadaConfig();
+        ScadaConfig.id = 'Device' + i;
+        ScadaConfig.name = 'Device ' + i;
+        ScadaConfig.type = 'Smart Device';
+        ScadaConfig.description = 'Device ' + i;
         for (let j = 1; j <= analogTagNum; j++) {
             let analogTagConfig = new edgeSDK.AnalogTagConfig();
             analogTagConfig.name = 'ATag' + j;
@@ -867,7 +679,7 @@ function deleteTagConfig() {
         }
         for (let j = 1; j <= textTagNum; j++) {
             let textTagConfig = new edgeSDK.TextTagConfig();
-            textTagConfig.name = 'TTag' + j;
+            textTagConfig.Name = 'TTag' + j;
             textTagList.push(textTagConfig);
         }
         for (let j = 1; j <= arrayTagNum; j++) {
@@ -875,11 +687,11 @@ function deleteTagConfig() {
             arrayTag.name = 'ArrayTag' + j;
             analogTagList.push(arrayTag);
         }
-        deviceConfig.analogTagList = analogTagList;
-        deviceConfig.discreteTagList = discreteTagList;
-        deviceConfig.textTagList = textTagList;
+        ScadaConfig.analogTagList = analogTagList;
+        ScadaConfig.discreteTagList = discreteTagList;
+        ScadaConfig.textTagList = textTagList;
 
-        edgeConfig.node.deviceList.push(deviceConfig);
+        edgeConfig.node.deviceList.push(ScadaConfig);
     }
 
     return edgeConfig;
@@ -895,3 +707,5 @@ function callback(error, response, body) {
         console.log(body);
     }
 }
+
+
