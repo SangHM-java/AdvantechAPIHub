@@ -1,11 +1,3 @@
-// const DatahubModel = require('../models/datahub.model');
-// const crypto = require('crypto');
-// const Utils = require("../../libs/Utils");
-// const Validator = require("../../libs/Validator");
-// var moment = require('moment');
-// const { v4: uuidv4 } = require('uuid');
-// const fs = require('fs');
-// const uploadPath = require('../../common/config/env.config.js').upload_path;
 const fs = require('fs');
 const config = require('../../common/config/env.config');
 const param_config = require('../../common/config/params.config');
@@ -16,14 +8,6 @@ const parser = require('xml2json');
 var request = require('request');
 const internal = require('stream');
 const { Interface } = require('readline');
-
-// GET parameters
-const parameters = {
-    MA_DIEMDO: "S1.01_AN",
-    TU_NGAY: "8/22/2021 6:41:12",
-    DEN_NGAY: "8/24/2021 6:41:12",
-    TOKEN: config.token
-}
 
 const headers = {
     'Accept': '*/*',
@@ -116,7 +100,7 @@ exports.connectDatahub = async (req, res) => {
         let datahub = { ...{}, ...req.body };
         console.log(datahub);
         // writeJsonFile('datahub_config.json', {nodeId: datahub.NodeId,credentialKey:datahub.CredentialKey,apiUrl :datahub.ApiUrl});
-        writeConfigFile(datahub);
+        //writeConfigFile(datahub);
         options = {
             connectType: edgeSDK.constant.connectType.MQTT,
             MQTT: {
@@ -144,7 +128,7 @@ exports.connectDatahub = async (req, res) => {
         edgeAgent.connect();
         edgeAgent.events.on('connected', () => {
             console.log('Connect success !');
-            edgeConfig = prepareConfig();
+            edgeConfig = datahubService.prepareConfig();
             console.log(edgeConfig);
             console.log(edgeConfig.Scada.TextTagList);
             console.log(edgeConfig.Scada.AnalogTagList);
@@ -153,9 +137,9 @@ exports.connectDatahub = async (req, res) => {
                 // when mqtt disconnect happened, and automatically reconnect
                 // clear interval to prevent duplicate time interval call
                 console.log(res);
-                clearInterval(sendTimer);
-                sendTimer = setInterval(sendData, 3000);
-                sendData();
+                // clearInterval(sendTimer);
+                // sendTimer = setInterval(sendData, 3000);
+                // sendData();
             }, error => {
                 console.log('upload config error');
                 console.log(error);
@@ -212,193 +196,10 @@ exports.disconnectDatahub = async (req, res) => {
 
 };
 
-exports.getTokenFromAPI = async (req, res) => {
-
-    try {
-        console.log("getTokenFromAPI");
-
-        const get_token_options = {
-            json: true,
-            url: 'http://smart.cpc.vn/etl/api/login?USER_NAME=chaunm&PASSWORD=chaunm123',
-            method: 'GET',
-            headers: headers,
-            //body: dataString
-        };
-
-        request(get_token_options, (error, response, body) => {
-            if (!error && response.statusCode == 200) {
-
-                res.status(200).send({ TOKEN: body.data.data.TOKEN });
-            }
-        });
-
-
-    } catch (error) {
-        console.log(error);
-        res.status(400).send({ message: "Datahub not exists" });
-    }
-
-};
-
 exports.sendDataAPIToDatahub = async (req, res) => {
 
     try {
-        console.log("sendDataAPIToDatahub");
-        let get_token_options = {
-            json: true,
-            url: 'http://smart.cpc.vn/etl/api/login?USER_NAME=chaunm&PASSWORD=chaunm123',
-            method: 'GET',
-            headers: headers,
-            //body: dataString
-        };
-        let TOKEN = "";
-
-        request(get_token_options, (error, response, body) => {
-            if (!error && response.statusCode == 200) {
-                TOKEN = body.data.TOKEN;
-                //res.status(200).send({TOKEN : body.data.data.TOKEN});
-                // const get_request_args = querystring.stringify(parameters);
-                let get_request_args = "MA_DIEMDO=S1.01_AN&TU_NGAY=8/22/2021 6:41:12&DEN_NGAY=8/24/2021 6:41:12&TOKEN=" + TOKEN;
-
-                let get_data_options = {
-                    json: true,
-                    url: 'https://smart.cpc.vn/etl/api/getAllInfoMeter?TOKEN=' + TOKEN,
-                    method: 'GET',
-                    headers: headers,
-                    //body: dataString
-                };
-
-
-                request(get_data_options, (error, response, body) => {
-                    if (!error && response.statusCode == 200) {
-                        api_data = body.data;
-                        let data = new edgeSDK.EdgeData();
-                        //let datahub_data = api_data[0];
-                        let edgeConfig = new edgeSDK.EdgeConfig();
-                        let textTagList = [];
-
-                        let limit = api_data.length;
-                        console.log(api_data.length);
-                        //>= 10 ? 10 : api_data.length
-                        for (let i = 0; i < limit; i++) {
-                            let datahub_data = api_data[i];
-
-                            for (const property2 in datahub_data) {
-                                if (datahub_data[property2] != null && datahub_data[property2] != "null") {
-                                    let TTag = new edgeSDK.Tag();
-
-                                    TTag.deviceId = 'Device' + i;
-                                    TTag.tagName = param_config[property2] != null ? param_config[property2].Tagname : property2;
-                                    TTag.value = "" + datahub_data[property2];
-                                    data.tagList.push(TTag);
-                                }
-
-                            }
-
-                            let TTaga = new edgeSDK.Tag();
-                            let a = Math.atanh(Math.acos(datahub_data["COSPHI_PHASE_A"])) * datahub_data["ACTIVE_POWER_PHASE_A"];
-                            let b = Math.atanh(Math.acos(datahub_data["COSPHI_PHASE_B"])) * datahub_data["ACTIVE_POWER_PHASE_B"];
-                            let c = Math.atanh(Math.acos(datahub_data["COSPHI_PHASE_C"])) * datahub_data["ACTIVE_POWER_PHASE_C"]
-
-                            TTaga.deviceId = 'Device' + i;
-                            TTaga.tagName = "Qa";
-                            TTaga.value = a;
-                            data.tagList.push(TTaga);
-
-                            let TTagb = new edgeSDK.Tag();
-
-                            TTagb.deviceId = 'Device' + i;
-                            TTagb.tagName = "Qb";
-                            TTagb.value = b;
-                            data.tagList.push(TTagb);
-
-                            let TTagc = new edgeSDK.Tag();
-
-                            TTagc.deviceId = 'Device' + i;
-                            TTagc.tagName = "Qc";
-                            TTagc.value = c;
-                            data.tagList.push(TTagc);
-
-                            let TTagCoshphi = new edgeSDK.Tag();
-                            let average = datahub_data["COSPCHI_PHASE_A"] != 0
-                                && datahub_data["COSPHI_PHASE_B"] != 0
-                                && datahub_data["COSPHI_PHASE_C"] != 0
-                                && datahub_data["COSPHI_PHASE_A"] != null
-                                && datahub_data["COSPHI_PHASE_B"] != null
-                                && datahub_data["COSPHI_PHASE_C"] != null ? 3 : 1;
-                            TTagCoshphi.deviceId = 'Device' + i;
-                            TTagCoshphi.tagName = "Coshphi";
-                            TTagCoshphi.value = (datahub_data["COSPHI_PHASE_A"] + datahub_data["COSPHI_PHASE_B"] + datahub_data["COSPHI_PHASE_C"]) / average;
-                            data.tagList.push(TTagCoshphi);
-
-                            console.log(average);
-                            console.log("KQ");
-                            console.log(datahub_data["COSPHI_PHASE_A"]);
-                            console.log(Math.cosh(datahub_data["COSPHI_PHASE_A"]));
-                            console.log(a, b, c);
-                            console.log((a + b + c) / average);
-                        }
-
-                        for (let i = 0; i < limit; i++) {
-                            let datahub_data = api_data[i];
-
-                            let ScadaConfig = new edgeSDK.ScadaConfig();
-                            ScadaConfig.id = 'Device' + i;
-                            ScadaConfig.name = datahub_data["MA_DIEMDO"];
-                            ScadaConfig.type = 'Smart Device';
-                            ScadaConfig.description = datahub_data["MA_DIEMDO"];
-
-                            for (const property1 in datahub_data) {
-                                let textTagConfig = new edgeSDK.TextTagConfig();
-                                textTagConfig.Name = param_config[property1] != null ? param_config[property1].Tagname : property1;
-                                textTagConfig.Description = param_config[property1] != null ? param_config[property1].Tagname : property1;
-                                textTagList.push(textTagConfig);
-                            }
-
-                            let textTagConfiga = new edgeSDK.TextTagConfig();
-                            textTagConfiga.name = "Qa";
-                            textTagConfiga.description = "Qa";
-                            textTagList.push(textTagConfiga);
-
-                            let textTagConfigb = new edgeSDK.TextTagConfig();
-                            textTagConfigb.name = "Qb";
-                            textTagConfigb.description = "Qb";
-                            textTagList.push(textTagConfigb);
-
-                            let textTagConfigc = new edgeSDK.TextTagConfig();
-                            textTagConfigc.name = "Qc";
-                            textTagConfigc.description = "Qc";
-                            textTagList.push(textTagConfigc);
-
-                            let textTagConfigCoshphi = new edgeSDK.TextTagConfig();
-                            textTagConfigCoshphi.name = "Coshphi";
-                            textTagConfigCoshphi.description = "Coshphi";
-                            textTagList.push(textTagConfigCoshphi);
-
-                            ScadaConfig.textTagList = textTagList;
-
-                            edgeConfig.node.deviceList.push(ScadaConfig);
-                        }
-
-                        edgeAgent.uploadConfig(edgeSDK.constant.actionType.create, edgeConfig).then((res2) => {
-                        edgeAgent.sendData(data);
-                        console.log(res2);
-                        res.status(200).send({ message: res2, deviceList: edgeConfig.node.deviceList });
-                        }, error => {
-                            console.log('upload config error');
-                            console.log(error);
-                        });
-
-
-
-                    }
-                });
-            }
-        });
-
-
-
-
+        
 
     } catch (error) {
         console.log(error);
@@ -407,11 +208,7 @@ exports.sendDataAPIToDatahub = async (req, res) => {
 
 };
 
-var list_meter_parameters = [];
-var list_meter_config = {};
-function getObjKeys(obj, value) {
-    return Object.keys(obj).filter(key => obj[key] === value);
-}
+
 /*
 {
   "baseUrl":"http://14.225.244.63:8083/VendingInterface.asmx/SUNGRP_getInstant?",
@@ -447,61 +244,6 @@ exports.getMeterParameters = async (req, res) => {
     }
 
 };
-
-exports.insert = async (req, res) => {
-    try {
-        console.log("insert");
-    } catch (error) {
-        return res.status(400).send(error);
-    }
-
-};
-
-exports.update = async (req, res) => {
-    try {
-        console.log("insert");
-    } catch (error) {
-        return res.status(400).send(error);
-    }
-
-};
-
-exports.list = async (req, res) => {
-    const { website } = req.query;
-    try {
-        console.log("insert");
-        return res.status(201).send({ message: "oke" });
-    } catch (error) {
-        return res.status(400).send(error);
-    }
-
-};
-
-exports.home = async (req, res) => {
-    const { website } = req.query;
-    try {
-        return res.status(201).send({ message: "Server side" });
-    } catch (error) {
-        return res.status(400).send(error);
-    }
-
-};
-
-exports.getById = async (req, res) => {
-
-    try {
-        console.log("insert");
-    } catch (error) {
-        res.status(400).send({ message: "Datahub not exists" });
-    }
-
-};
-
-exports.removeById = (req, res) => {
-    console.log("insert");
-};
-
-
 
 function prepareConfig() {
     let edgeConfig = new edgeSDK.EdgeConfig();
@@ -544,12 +286,12 @@ function prepareConfig() {
     for (let i = 0; i < tagList.length; i++) {
         if (tagList[i].type == "string") {
             let textTagConfig = new edgeSDK.TextTagConfig();
-            textTagConfig.Name = tagList[i].name;
+            textTagConfig.Name = '20698013' + tagList[i].name;
             textTagConfig.Description = tagList[i].name;
             textTagList.push(textTagConfig);
         } else {
             let analogTagConfig = new edgeSDK.AnalogTagConfig();
-            analogTagConfig.Name = tagList[i].name;
+            analogTagConfig.Name = '20698013' + tagList[i].name;
             analogTagConfig.Description = tagList[i].name;
             analogTagList.push(analogTagConfig);
         }
@@ -592,17 +334,19 @@ function prepareData() {
         if(tagList[i].type == "string"){
             let TTag = new edgeSDK.Tag();
             TTag.DeviceId = options.nodeId;
-            TTag.TagName = tagList[i].name;
+            TTag.TagName = '20698013_' + tagList[i].name;
             TTag.Value = '20698013';
             data.TagList.push(TTag);
         }else{
             let ATag = new edgeSDK.Tag();
             ATag.DeviceId = options.nodeId;
-            ATag.TagName = tagList[i].name;
-            ATag.Value = {
-                "0": Math.floor(Math.random() * 100) + 1,
-                "1": Math.floor(Math.random() * 100) + 1
-            };
+            ATag.TagName = '20698013_' + tagList[i].name;
+            ATag.Value = Math.floor(Math.random() * 100) + 1
+            // {
+            //     "0": Math.floor(Math.random() * 100) + 1,
+            //     "1": Math.floor(Math.random() * 100) + 1
+            // }
+            ;
             data.TagList.push(ATag);
         }
     }

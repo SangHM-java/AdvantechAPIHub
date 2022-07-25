@@ -2,13 +2,42 @@ const config = require('./common/config/env.config.js');
 
 const express = require('express');
 const app = express();
+swaggerJsdoc = require("swagger-jsdoc"),
+swaggerUi = require("swagger-ui-express");
 const bodyParser = require('body-parser');
 
 // const AuthorizationRouter = require('./authorization/routes.config');
 const AdministratorRouter = require('./administrators/routes.config');
 const fs = require('fs');
 const path = require('path');
-
+const options = {
+    definition: {
+      openapi: "3.0.0",
+      info: {
+        title: "LogRocket Express API with Swagger",
+        version: "0.1.0",
+        description:
+          "This is a simple CRUD API application made with Express and documented with Swagger",
+        license: {
+          name: "MIT",
+          url: "https://spdx.org/licenses/MIT.html",
+        },
+        contact: {
+          name: "LogRocket",
+          url: "https://logrocket.com",
+          email: "info@email.com",
+        },
+      },
+      servers: [
+        {
+          url: "http://localhost:8080/",
+        },
+      ],
+    },
+    apis: ["back-end/administrators/routes.config.js"],
+  };
+  
+  const specs = swaggerJsdoc(options);
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Credentials', 'true');
@@ -33,8 +62,14 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
+
 // AuthorizationRouter.routesConfig(app);
 AdministratorRouter.routesConfig(app);
+app.use(
+    "",
+    swaggerUi.serve,
+    swaggerUi.setup(specs)
+  );
 
 // var dir = path.join(__dirname, 'uploads');
 // var mime = {
